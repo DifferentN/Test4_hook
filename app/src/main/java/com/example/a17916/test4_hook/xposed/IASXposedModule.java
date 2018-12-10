@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 import com.example.a17916.test4_hook.diskSave.DiskSave;
+import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 import com.example.a17916.test4_hook.util.activityView.ActivityCache;
@@ -62,12 +63,19 @@ public class IASXposedModule implements IXposedHookLoadPackage {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 //                super.afterHookedMethod(param);
-                Log.i("LZH",((Activity)param.thisObject).getComponentName().getClassName()+" unregisterReceiver ");
+                Activity activity = (Activity) param.thisObject;
+                ComponentName componentName = activity.getComponentName();
+//                Log.i("LZH",activity.getComponentName().getClassName()+" unregisterReceiver ");
                 LocalActivityReceiver receiver = (LocalActivityReceiver) XposedHelpers.getAdditionalInstanceField(param.thisObject,"iasReceiver");
                 if(receiver != null) {
-                    ((Activity) param.thisObject).unregisterReceiver(receiver);
+                    activity.unregisterReceiver(receiver);
                     XposedHelpers.setAdditionalInstanceField(param.thisObject, "iasReceiver", null);
                 }
+                Intent broad = new Intent();
+                broad.setAction(MonitorActivityReceiver.ON_DESTROY_STATE);
+                broad.putExtra(MonitorActivityReceiver.DESTROY_PACKAGE_NAME,componentName.getPackageName());
+                broad.putExtra(MonitorActivityReceiver.DESTROY_ACTIVITY_NAME,componentName.getClassName());
+                activity.sendBroadcast(broad);
             }
         });
     }

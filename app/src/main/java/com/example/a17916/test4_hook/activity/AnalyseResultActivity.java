@@ -11,6 +11,7 @@ import com.example.a17916.test4_hook.R;
 import com.example.a17916.test4_hook.TestGenerateTemple.PageResult;
 import com.example.a17916.test4_hook.matchModule.SearchThread;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
 
 import org.json.JSONException;
@@ -72,8 +73,8 @@ public class AnalyseResultActivity extends AppCompatActivity {
         Intent intent = savePreference.getIntent("com.douban.frodo.subject.activity.LegacySubjectActivity");
         String packageName = "com.douban.movie";
         String activityName = "com.douban.frodo.subject.activity.LegacySubjectActivity";
-        intent.putExtra(MonitorActivityService.targetPackageName,packageName);
-        intent.putExtra(MonitorActivityService.targetActivityName,activityName);
+        intent.putExtra(LocalActivityReceiver.targetPackageName,packageName);
+        intent.putExtra(LocalActivityReceiver.targetActivityName,activityName);
         return intent;
     }
 }

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 
+import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 
@@ -39,9 +40,15 @@ public class ActivityOnResumeHook extends XC_MethodHook {
         intent.putExtra("currentActivity",bundle);
         activity.sendBroadcast(intent);
 
-        //给服务发送打开命令，打开指定activity
+//        //给服务发送打开命令，打开指定activity
+//        Intent broad = new Intent();
+//        broad.setAction(MonitorActivityService.openActivity);
+//        activity.sendBroadcast(broad);
+
         Intent broad = new Intent();
-        broad.setAction(MonitorActivityService.openActivity);
+        broad.setAction(MonitorActivityReceiver.ON_RESUME_STATE);
+        broad.putExtra(MonitorActivityReceiver.OPENED_PACKAGE_NAME,componentName.getPackageName());
+        broad.putExtra(MonitorActivityReceiver.OPENED_ACTIVITY_NAME,componentName.getClassName());
         activity.sendBroadcast(broad);
 
         //测试中，保存打开应用的Intent

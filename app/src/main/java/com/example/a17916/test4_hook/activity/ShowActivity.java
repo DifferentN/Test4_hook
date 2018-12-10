@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.example.a17916.test4_hook.R;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
 
 public class ShowActivity extends AppCompatActivity {
@@ -53,8 +54,8 @@ public class ShowActivity extends AppCompatActivity {
         Intent openActivity = new Intent();
 
         openActivity.setAction(MonitorActivityService.openByIntent);
-        openActivity.putExtra(MonitorActivityService.targetPackageName,packageName);
-        openActivity.putExtra(MonitorActivityService.targetActivityName,activityName);
+        openActivity.putExtra(LocalActivityReceiver.targetPackageName,packageName);
+        openActivity.putExtra(LocalActivityReceiver.targetActivityName,activityName);
         openActivity.putExtra("tarIntent",tarIntent);
         openActivity.putExtra("time",time);
         Log.i("LZH","time "+time);

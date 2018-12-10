@@ -67,6 +67,13 @@
 
         </service>
 
+        <service android:name=".manageActivity.ControllerService"
+            android:exported="true"
+            android:enabled="true"
+            android:label="监控Activity">
+
+        </service>
+
         <provider
             android:authorities="com.example.a17916.test4_hook.provider"
             android:exported="true"

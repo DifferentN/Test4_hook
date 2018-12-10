@@ -19,9 +19,6 @@ import java.util.ArrayList;
 
 public class MonitorActivityService extends Service{
 
-    public static final String targetActivityName = "targetActivityName";
-    public static final String targetPackageName = "targetPackageName";
-
     public static final String openActivity = "openActivity";
     public static final String opened = "hasOpened";
     public static final String openByIntent = "openActivityByIntent";
@@ -58,6 +55,9 @@ public class MonitorActivityService extends Service{
         intentFilter.addAction(MonitorActivityReceiver.openByIntentInfo);
         intentFilter.addAction(MonitorActivityReceiver.openActivity);
         intentFilter.addAction(MonitorActivityReceiver.opened);
+        intentFilter.addAction(MonitorActivityReceiver.ON_CREATE_STATE);
+        intentFilter.addAction(MonitorActivityReceiver.ON_RESUME_STATE);
+        intentFilter.addAction(MonitorActivityReceiver.ON_DESTROY_STATE);
         registerReceiver(openActivityReceiver,intentFilter);
 
         BroadcastReceiver saveReceiver = new BroadcastReceiver() {

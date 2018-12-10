@@ -10,7 +10,10 @@ import android.view.View;
 
 import com.example.a17916.test4_hook.R;
 import com.example.a17916.test4_hook.ViewManager.FloatViewManager;
+import com.example.a17916.test4_hook.manageActivity.ActivityController;
+import com.example.a17916.test4_hook.manageActivity.ControllerService;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         floatViewManager.showFloatButton();
     }
     private void StartSendDataService(){
-        Intent intent = new Intent(this,MonitorActivityService.class);
+        Intent intent = new Intent(this,ControllerService.class);
         startService(intent);
     }
 
@@ -55,18 +58,9 @@ public class MainActivity extends AppCompatActivity {
 //        sendBroadcast(broadcast);
     }
     public void openByIntent(View view){
-//        Intent openActivity = new Intent();
-//        openActivity.setAction(OpenActivityService.openByIntent);
-//        openActivity.putExtra(OpenActivityService.targetPackageName,packageName);
-//        openActivity.putExtra(OpenActivityService.targetActivityName,activityName);
-//        sendBroadcast(openActivity);
-//
-//        PackageManager packageManager = getPackageManager();
-//        Intent intent = new Intent();
-////        com.douban.movie
-//        intent = packageManager.getLaunchIntentForPackage("com.yongche.android");
-//        startActivity(intent);
-        openCreateIntent();
+        ActivityController controller = ActivityController.getInstance(getApplicationContext());
+        controller.openActivity("com.douban.movie",getTarIntent("com.douban.frodo.subject.activity.LegacySubjectActivity"));
+//        openCreateIntent();
     }
     public void openCreateIntent(){
         int time = 0;
@@ -78,15 +72,10 @@ public class MainActivity extends AppCompatActivity {
         Intent openActivity = new Intent();
         ComponentName componentName = new ComponentName(packageName,activityName);
         tarIntent.setComponent(componentName);
-//        tarIntent.putExtra("show_progress_" ,false);
-//        tarIntent.putExtra("__intent_url__" ,"file:///android_asset/data/start_off/yishi.html");
-//        tarIntent.putExtra("__intent_title__" ,"驾照遗失");
-//        tarIntent.putExtra("__intent_show_title__" ,false);
-//        tarIntent = getTarIntent(activityName);
 
         openActivity.setAction(MonitorActivityService.openByIntent);
-        openActivity.putExtra(MonitorActivityService.targetPackageName,packageName);
-        openActivity.putExtra(MonitorActivityService.targetActivityName,activityName);
+        openActivity.putExtra(LocalActivityReceiver.targetPackageName,packageName);
+        openActivity.putExtra(LocalActivityReceiver.targetActivityName,activityName);
         openActivity.putExtra("tarIntent",tarIntent);
         openActivity.putExtra("time",time);
         Log.i("LZH","time "+time);

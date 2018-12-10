@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.View;
 
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 
 import java.util.List;
 
@@ -22,14 +23,14 @@ public class ItemListener implements RecyclerViewItemListener {
         launchIntent(list.get(pos));
     }
     private void launchIntent(Intent tarIntent){
-        String packageName = tarIntent.getStringExtra(MonitorActivityService.targetPackageName);
-        String activityName = tarIntent.getStringExtra(MonitorActivityService.targetActivityName);
+        String packageName = tarIntent.getStringExtra(LocalActivityReceiver.targetPackageName);
+        String activityName = tarIntent.getStringExtra(LocalActivityReceiver.targetActivityName);
         Intent intent  = context.getPackageManager().getLaunchIntentForPackage(packageName);
 
         Intent openActivity = new Intent();
         openActivity.setAction(MonitorActivityService.openByIntent);
-        openActivity.putExtra(MonitorActivityService.targetPackageName,packageName);
-        openActivity.putExtra(MonitorActivityService.targetActivityName,activityName);
+        openActivity.putExtra(LocalActivityReceiver.targetPackageName,packageName);
+        openActivity.putExtra(LocalActivityReceiver.targetActivityName,activityName);
         openActivity.putExtra("tarIntent",tarIntent);
         context.sendBroadcast(openActivity);
 

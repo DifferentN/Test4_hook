@@ -21,7 +21,7 @@ public class ActivityController {
     }
     public void openActivity(String packageName,Intent intent){
         Intent broadIntent = new Intent();
-        broadIntent.setAction(ActivityController.SEND_INTENT_MOTION);
+        broadIntent.setAction(ActivityController.SEND_ACTIVITY_INTENT);
         broadIntent.putExtra(ActivityController.TARGET_INTENT,intent);
         broadIntent.putExtra(ActivityController.PK_NAME,packageName);
         context.sendBroadcast(broadIntent);

@@ -33,6 +33,11 @@ public class LocalActivityReceiver extends BroadcastReceiver {
     public static final String openTargetActivityByIntentInfo = "openTargetActivityByIntentInfo";
     public static final String openTargetActivityByIntent = "openTargetActivityByIntent";
 
+    public static final String fromActivityStart ="fromActivityStart";
+    public static final String TARGET_INTENT = "targetIntent";
+    public static final String targetActivityName = "targetActivityName";
+    public static final String targetPackageName = "targetPackageName";
+
     private String showActivityName = "";
     private String selfActivityName = "";
     private String curPackageName = "";
@@ -72,81 +77,46 @@ public class LocalActivityReceiver extends BroadcastReceiver {
                 Bundle bundle = intent.getBundleExtra("currentActivity");
                 showActivityName = (String) bundle.get("showActivity");
                 curPackageName = (String)bundle.get("curPackage");
-                Log.i("LZH",selfActivityName+" show activity: "+showActivityName);
-                break;
-            case LocalActivityReceiver.openTargetActivityByIntentInfo:
-
-                Bundle bundle1 = intent.getExtras();
-                packageName = bundle1.getString("packageName");
-                tarActivityName = bundle1.getString("tarActivityName");
-                dataUri = bundle1.getString("dataUri");
-                if(startActivity.get(tarActivityName)==null){
-                    startActivity.put(tarActivityName,1);
-                }else{
-                    break;
-                }
-                Intent intent1 = new Intent();
-//                packageName = "com.example.a17916.test3_1";
-//                tarActivityName = "com.example.a17916.test3_1.SecondActivity";
-                ComponentName component = new ComponentName(packageName,tarActivityName);
-                Uri data = Uri.parse(dataUri);
-                intent1.setComponent(component);
-                intent1.setData(data);
-                intent1.setAction("android.intent.action.VIEW");
-
-                ComponentName componentName2 = targetActivity.getComponentName();
-                isOpen = componentName2.getClassName().equals(tarActivityName);
-                isAtSameApp = componentName2.getPackageName().equals(packageName);
-                if(!isOpen&&isAtSameApp){
-                    targetActivity.startActivity(intent1);
-                }
+//                Log.i("LZH",selfActivityName+" show activity: "+showActivityName);
                 break;
             case LocalActivityReceiver.openTargetActivityByIntent:
-                Intent tarIntent = intent.getParcelableExtra("opendActivityIntent");
+                Intent tarIntent = intent.getParcelableExtra(LocalActivityReceiver.TARGET_INTENT);
+                String startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityStart);
+                if(startActivityFrom.compareTo(selfActivityName)!=0){
+                    break;
+                }
+                Log.i("LZH","open activity");
+                targetActivity.startActivity(tarIntent);
 //                packageName = "com.douban.movie";//com.yongche.android
 //                tarActivityName = "com.douban.frodo.subject.activity.LegacySubjectActivity";
 //                pkName = "com.yongche.android";
 
-                packageName = intent.getStringExtra(MonitorActivityService.targetPackageName);
-                tarActivityName = intent.getStringExtra(MonitorActivityService.targetActivityName);
-
-
-//                tarActivityName = "com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity";
-                //com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity
-                ComponentName c2 = targetActivity.getComponentName();
-                isOpen = showActivityName.compareTo(tarActivityName)==0;
-                isAtSameApp = curPackageName.compareTo(packageName)==0&&c2.getPackageName().compareTo(packageName)==0;
-//                Log.i("LZH","tarActiName: "+c2.getClassName()+" tarPKName "+c2.getPackageName());
-//                Log.i("LZH","IntentIndo: "+packageName+" tarAcName "+tarActivityName);
-//                Log.i("LZH","if:"+isOpen+" "+isAtSameApp);
-                if (!isOpen&&isAtSameApp) {
-//                    Log.i("LZH","tarActiName: "+c2.getClassName()+" tarPKName "+c2.getPackageName());
-//                    Log.i("LZH","IntentIndo: "+packageName+" tarAcName "+tarActivityName);
-//                    Log.i("LZH","tarIntent: "+getIntentInfo(tarIntent));
-
-                    //针对豆瓣电影设置，从主页面启动
-//                    if(showActivityName.contains("MainActivity")&&showActivityName.compareTo(c2.getClassName())==0){
+//                packageName = tarIntent.getComponent().getPackageName();
+//                tarActivityName = tarIntent.getComponent().getClassName();
+//
+//
+////                tarActivityName = "com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity";
+//                //com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity
+//                ComponentName c2 = targetActivity.getComponentName();
+//                isOpen = showActivityName.compareTo(tarActivityName)==0;
+//                isAtSameApp = curPackageName.compareTo(packageName)==0&&c2.getPackageName().compareTo(packageName)==0;
+//                if (!isOpen&&isAtSameApp) {
+//                    if(showActivityName.contains("Main")&&showActivityName.compareTo(c2.getClassName())==0){
 //                        targetActivity.startActivity(tarIntent);
 //                    }
-                    if(showActivityName.contains("Main")&&showActivityName.compareTo(c2.getClassName())==0){
-                        targetActivity.startActivity(tarIntent);
-                    }
-
-
-//                    Log.i("LZH","open: "+getIntentInfo(tarIntent));
-                }else if(isOpen&&showActivityName.compareTo(c2.getClassName())==0){
-                    //&&showActivityName.compareTo(c2.getClassName())==0
-                    Log.i("LZH","selfActivity Name: "+c2.getClassName()+"replay TouchEvent");
-                    notifyActivityHasOpened(targetActivity);
-                    Bundle bundle2 = intent.getBundleExtra("event");
-                    byte[] bytes = bundle2.getByteArray("motionEvents");
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-//                    playMotionEvent(bytes);
-                }
+//                }else if(isOpen&&showActivityName.compareTo(c2.getClassName())==0){
+//                    //&&showActivityName.compareTo(c2.getClassName())==0
+//                    Log.i("LZH","selfActivity Name: "+c2.getClassName()+"replay TouchEvent");
+//                    notifyActivityHasOpened(targetActivity);
+//                    Bundle bundle2 = intent.getBundleExtra("event");
+//                    byte[] bytes = bundle2.getByteArray("motionEvents");
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+////                    playMotionEvent(bytes);
+//                }
 
                 break;
         }

@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 
@@ -16,12 +17,18 @@ public class ControllerService extends Service {
         super.onCreate();
         Intent intent = new Intent(this,MonitorActivityService.class);
         bindService(intent,connection,Context.BIND_AUTO_CREATE);
+
     }
     private ServiceConnection connection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             transportBinder = (MonitorActivityService.TransportBinder) service;
+            ControllerReciver reciver = new ControllerReciver(transportBinder);
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(ActivityController.SEND_INTENT_MOTION);
+            intentFilter.addAction(ActivityController.SEND_ACTIVITY_INTENT);
+            registerReceiver(reciver,intentFilter);
         }
 
         @Override
