@@ -6,12 +6,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.Log;
 
+import com.example.a17916.test4_hook.manageActivity.ActivityController;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class MonitorActivityReceiver extends BroadcastReceiver {
 
@@ -46,70 +51,64 @@ public class MonitorActivityReceiver extends BroadcastReceiver {
 
     private SavePreference savePreference;
 
+    private ArrayMap<String,Boolean> mapIsOpened;
+
+    //记录App打开的页面，当>=2个时，打开目标页面
+    private ArrayMap<String,HashMap<String,Boolean>> record;
+    private HashMap<String,Boolean> hashMap;
     public MonitorActivityReceiver(Service service){
         this.service = service;
         savePreference = SavePreference.getInstance(service);
         liveActivity = new ArrayList<>();
+        mapIsOpened = new ArrayMap<>();
+        record = new ArrayMap<>();
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         String pkName = "",activityName = "";
-//        switch (action){
-//            case MonitorActivityService.openActivity:
-//                openActivity();
-//                break;
-//            case MonitorActivityService.openByIntent:
-//                openWay = openByIntent;
-//
-//                recordTargetActivityInfo(intent);
-//                break;
-//            case MonitorActivityService.openByIntentInfo:
-//                openWay = openByIntentInfo;
-//                break;
-//            case MonitorActivityService.opened:
-//                openWay = "";
-//                break;
-//            case MonitorActivityReceiver.testSave:
-//                tarIntent = intent.getParcelableExtra("testIntent");
-//                break;
-//        }
         switch (action){
             case MonitorActivityReceiver.ON_CREATE_STATE:
-
                 break;
             case MonitorActivityReceiver.ON_RESUME_STATE:
                 pkName = intent.getStringExtra(OPENED_PACKAGE_NAME);
                 activityName = intent.getStringExtra(OPENED_ACTIVITY_NAME);
+
+                hashMap = record.get(pkName);
+                if(hashMap==null){
+                    hashMap = new HashMap<>();
+                    record.put(pkName,hashMap);
+                }
+                hashMap.put(activityName,true);
+
                 if(currentPackageName==null||currentPackageName.compareTo(pkName)!=0){
                     currentPackageName = pkName;
                     resetState();
                     Log.i("LZH","切换了应用");
                 }
                 liveActivity.add(activityName);
-                if(activityName.compareTo(targetActivityName)==0){
-                    toOpenActivity = false;
-                    isOpenedActivity = true;
-                }
-                resumeActivityTime++;
-                needOpenActivity();
+                needOpenActivity(pkName,activityName);
                 break;
             case MonitorActivityReceiver.ON_DESTROY_STATE:
                 pkName = intent.getStringExtra(DESTROY_PACKAGE_NAME);
                 activityName = intent.getStringExtra(DESTROY_ACTIVITY_NAME);
-
+                hashMap = record.get(pkName);
+                if(hashMap.get(pkName)!=null){
+                    hashMap.remove(pkName);
+                }
                 break;
-
 
         }
 
     }
 
-    private void needOpenActivity() {
-        Log.i("LZH","toOpenActivity: "+toOpenActivity+" "+(resumeActivityTime-destroyActivityTime));
-        if(toOpenActivity&&resumeActivityTime==2){
+
+    private void needOpenActivity(String PKName,String activityName) {
+        hashMap = record.get(PKName);
+        if(hashMap.size()>=2&&toOpenActivity&&activityName.compareTo(targetActivityName)!=0){
             openActivityByIntent();
+            toOpenActivity = false;
         }
     }
 
@@ -155,7 +154,7 @@ public class MonitorActivityReceiver extends BroadcastReceiver {
         targetPackageName = componentName.getPackageName();
         targetActivityName = componentName.getClassName();
         resetState();
+        mapIsOpened.put(targetActivityName,false);
         toOpenActivity = true;
-        isOpenedActivity = false;
     }
 }

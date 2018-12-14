@@ -30,10 +30,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startFloatBt(View view){
-
         FloatViewManager floatViewManager = FloatViewManager.getInstance(this);
         floatViewManager.showFloatButton();
     }
+    public void createTempleBt(View view){
+        FloatViewManager floatViewManager = FloatViewManager.getInstance(this);
+        floatViewManager.showCreateTempleBt();
+    }
+
     private void StartSendDataService(){
         Intent intent = new Intent(this,ControllerService.class);
         startService(intent);

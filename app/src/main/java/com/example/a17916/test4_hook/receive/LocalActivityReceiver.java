@@ -15,7 +15,7 @@ import android.view.View;
 import com.example.a17916.test4_hook.TestGenerateTemple.AnalysePageRawDataTool;
 import com.example.a17916.test4_hook.TestGenerateTemple.PageResult;
 import com.example.a17916.test4_hook.TestGenerateTemple.TestGenerateTemple;
-import com.example.a17916.test4_hook.activity.AnalyseResultActivity;
+import com.example.a17916.test4_hook.activity.showResult.AnalyseResultActivity;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 import com.example.a17916.test4_hook.view_data.MyViewNode;
 import com.example.a17916.test4_hook.view_data.MyViewTree;
@@ -57,9 +57,9 @@ public class LocalActivityReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         switch (action){
             case LocalActivityReceiver.viewTree:
-                Log.i("LZH","activity: "+selfActivityName);
+//                Log.i("LZH","activity: "+selfActivityName);
                 if(selfActivityName.equals(showActivityName)){
-                    Log.i("LZH","send View Tree  "+selfActivityName);
+//                    Log.i("LZH","send View Tree  "+selfActivityName);
 //                    sendViewTree(context);
                     ArrayList<PageResult> pageResults = analyseViewTree(context);
 
@@ -68,7 +68,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
                     targetActivity.startActivity(openInfo);
                     Log.i("LZH","open window");
                 }else{
-                    Log.i("LZH","not open window "+selfActivityName+"  show "+showActivityName);
+//                    Log.i("LZH","not open window "+selfActivityName+"  show "+showActivityName);
                 }
                 break;
             case LocalActivityReceiver.findView:
@@ -132,7 +132,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
     private Intent getShowIntent(ArrayList<PageResult> pageResults){
         Intent intent = new Intent();
 //        ComponentName componentName = new ComponentName("com.example.a17916.test4_hook","com.example.a17916.test4_hook.activity.ShowActivity");
-        ComponentName componentName = new ComponentName("com.example.a17916.test4_hook","com.example.a17916.test4_hook.activity.AnalyseResultActivity");
+        ComponentName componentName = new ComponentName("com.example.a17916.test4_hook","com.example.a17916.test4_hook.activity.showResult.AnalyseResultActivity");
         intent.setComponent(componentName);
         intent.putParcelableArrayListExtra(AnalyseResultActivity.PageResult,pageResults);
         return  intent;

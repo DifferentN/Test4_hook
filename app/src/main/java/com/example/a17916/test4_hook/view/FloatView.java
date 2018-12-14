@@ -79,7 +79,6 @@ public class FloatView extends View {
                 showView();
                 lastX = event.getRawX();
                 lastY = event.getRawY();
-//                Log.i("LZH","dx: "+dx+" dy: "+dy);
                 break;
             case MotionEvent.ACTION_UP:
 

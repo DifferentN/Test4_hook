@@ -9,6 +9,8 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.util.Log;
 
+import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
+import com.example.a17916.test4_hook.receive.CreateTempleReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 
 import de.robv.android.xposed.XC_MethodHook;
@@ -44,16 +46,13 @@ public class ActivityOnCreateHook extends XC_MethodHook {
 
 
         Intent intent = activity.getIntent();
-        Log.i("LZH",activity.getComponentName().getPackageName());
-        print(activity.getComponentName().getClassName(),intent);
+//        Log.i("LZH",activity.getComponentName().getPackageName());
+//        print(activity.getComponentName().getClassName(),intent);
         Uri data = intent.getData();
-        if(data != null){
-//            KLog.v("deeplink",activityName);
-//            KLog.v("deeplink", data.toString());
-        }
 
 //        KLog.v(BuildConfig.GETVIEW, "#*#*#*#*#*#*# enable receiver in: " + activityName);
         injectReceiver(context, activity);
+        injectCreateTempleReceiver(activity);
     }
 
     private void injectReceiver(Context context, Activity activity) {
@@ -85,6 +84,15 @@ public class ActivityOnCreateHook extends XC_MethodHook {
         XposedHelpers.setAdditionalInstanceField(activity, "iasReceiver", receiver);
         activity.registerReceiver(receiver,filter);
 //        Log.i("LZH","register activity: "+componentName.getClassName());
+    }
+    private void injectCreateTempleReceiver(Activity activity){
+
+        CreateTempleReceiver receiver = new CreateTempleReceiver(activity);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(CreateTempleReceiver.CREATE_TEMPLE);
+        filter.addAction(MonitorActivityReceiver.ON_RESUME_STATE);
+        XposedHelpers.setAdditionalInstanceField(activity, "iasCreateTempleReceiver", receiver);
+        activity.registerReceiver(receiver,filter);
     }
 
     private String getIntentInfo(Intent intent){

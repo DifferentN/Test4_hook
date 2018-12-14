@@ -17,7 +17,7 @@ public class YiDaoUseCar extends IntentAdapter {
     public List<Intent> getIntentsByJson(String tag, JSONObject jsonObject) {
         List<Intent> intents = new ArrayList<>();
         intents.add(test1GetIntent(tag));
-        intents.add(test1GetIntent(tag));
+//        intents.add(test1GetIntent(tag));
         return intents;
     }
 
@@ -33,6 +33,7 @@ public class YiDaoUseCar extends IntentAdapter {
     //获得事先保存的Intent
     private Intent test1GetIntent(String tag){
         //com.yongche.android.YDBiz.Order.HomePage.MainActivity
+        //com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity
         String activityName = "com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity";
         SavePreference savePreference = SavePreference.getInstance(context);
         Intent intent = savePreference.getIntent(activityName);

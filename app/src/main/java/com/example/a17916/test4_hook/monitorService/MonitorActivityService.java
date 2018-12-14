@@ -98,17 +98,7 @@ public class MonitorActivityService extends Service{
         startActivity(openApp);
 
     }
-    private void openActivityByIntentInfo() {
-        Intent broadcast = new Intent();
-        broadcast.setAction(LocalActivityReceiver.openTargetActivityByIntentInfo);
-        Bundle bundle = new Bundle();
-        bundle.putString("packageName","com.douban.movie");//com.douban.movie
-//        com.douban.frodo.subject.activity.LegacySubjectActivity
-        bundle.putString("tarActivityName","com.douban.frodo.subject.activity.LegacySubjectActivity");
-        bundle.putString("dataUri","douban://douban.com/movie/3168101");
-        broadcast.putExtras(bundle);
-        sendBroadcast(broadcast);
-    }
+
 
     private void openActivityByIntent() {
         if(historyInent.size()<=0){

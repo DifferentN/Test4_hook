@@ -10,6 +10,8 @@ public class ActivityController {
     public static final String SEND_INTENT_MOTION = "sendIntentMotion";
     public static final String TARGET_INTENT = "targetIntent";
     public static final String PK_NAME = "packageName";
+
+    private String currentActivityName;
     public ActivityController(Context context){
         this.context = context;
     }

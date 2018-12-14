@@ -15,6 +15,7 @@ import android.view.Window;
 
 import com.example.a17916.test4_hook.diskSave.DiskSave;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
+import com.example.a17916.test4_hook.receive.CreateTempleReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 import com.example.a17916.test4_hook.util.activityView.ActivityCache;
@@ -45,6 +46,7 @@ public class IASXposedModule implements IXposedHookLoadPackage {
         XposedHelpers.findAndHookMethod("android.app.Activity", loadPackageParam.classLoader, "onCreate", Bundle.class, new ActivityOnCreateHook(loadPackageParam));
         XposedHelpers.findAndHookMethod("android.app.Activity", loadPackageParam.classLoader, "onResume", new ActivityOnResumeHook());
         XposedHelpers.findAndHookMethod("android.app.Activity",loadPackageParam.classLoader,"dispatchTouchEvent",MotionEvent.class,new ActivityOnTouchEventHook());
+        XposedHelpers.findAndHookMethod("android.app.Activity",loadPackageParam.classLoader,"getIntent",new TestHookMethod());
 //        XposedHelpers.findAndHookMethod("android.support.v7.widget.RecyclerView",loadPackageParam.classLoader,"onTouchEvent",MotionEvent.class,new RecyclerViewOnTouchEventHook());
 //        XposedHelpers.findAndHookMethod("android.view.ViewGroup",loadPackageParam.classLoader,"dispatchTouchEvent",MotionEvent.class,new ViewGroupDispatchTouchEventHook());
 //        XposedHelpers.findAndHookMethod("android.view.ViewGroup",loadPackageParam.classLoader,"dispatchTransformedTouchEvent",MotionEvent.class,boolean.class,View.class,int.class,new VGdispatchTransformedTouchEventHook());
@@ -65,11 +67,16 @@ public class IASXposedModule implements IXposedHookLoadPackage {
 //                super.afterHookedMethod(param);
                 Activity activity = (Activity) param.thisObject;
                 ComponentName componentName = activity.getComponentName();
-//                Log.i("LZH",activity.getComponentName().getClassName()+" unregisterReceiver ");
+
                 LocalActivityReceiver receiver = (LocalActivityReceiver) XposedHelpers.getAdditionalInstanceField(param.thisObject,"iasReceiver");
                 if(receiver != null) {
                     activity.unregisterReceiver(receiver);
                     XposedHelpers.setAdditionalInstanceField(param.thisObject, "iasReceiver", null);
+                }
+                CreateTempleReceiver templeReceiver = (CreateTempleReceiver) XposedHelpers.getAdditionalInstanceField(param.thisObject,"iasCreateTempleReceiver");
+                if(templeReceiver != null) {
+                    activity.unregisterReceiver(templeReceiver);
+                    XposedHelpers.setAdditionalInstanceField(param.thisObject, "iasCreateTempleReceiver", null);
                 }
                 Intent broad = new Intent();
                 broad.setAction(MonitorActivityReceiver.ON_DESTROY_STATE);

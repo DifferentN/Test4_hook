@@ -27,7 +27,7 @@
             android:exported="true">
 
         </activity>
-        <activity android:name=".activity.AnalyseResultActivity"
+        <activity android:name=".activity.showResult.AnalyseResultActivity"
             android:exported="true">
 
         </activity>

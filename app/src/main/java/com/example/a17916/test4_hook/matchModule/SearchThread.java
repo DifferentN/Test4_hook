@@ -6,8 +6,12 @@ import android.content.Intent;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.example.a17916.test4_hook.matchModule.impl.TaoPiaoPiaoBookTicket;
+import com.example.a17916.test4_hook.matchModule.impl.YiDaoUseCar;
+
 import org.json.JSONObject;
 
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,27 +23,28 @@ public class SearchThread {
 
 
     //list中保存adapter的类名
-    private static ArrayMap<String,List<String>> tag2App;
+    private static ArrayMap<String,List<Class>> tag2App;
 
     static{
         tag2App = new ArrayMap<>();
         //添加<tag--应用>映射
-        ArrayList<String> movieName = new ArrayList<>();
-        movieName.add("com.example.a17916.test4_hook.matchModule.impl.MaoYanBookTicket");
+        ArrayList<Class> movieName = new ArrayList<>();
+        movieName.add(TaoPiaoPiaoBookTicket.class);
         tag2App.put("电影名称",movieName);
 
-        ArrayList<String> place = new ArrayList<>();
-        place.add("com.example.a17916.test4_hook.matchModule.impl.YiDaoUseCar");
-        tag2App.put("",place);
+        ArrayList<Class> place = new ArrayList<>();
+        place.add(YiDaoUseCar.class);
+        tag2App.put("地点",place);
 
     }
 
     public List<Intent> getIntent(String tag, JSONObject jsonObject){
+
         ArrayList<Intent> intents = new ArrayList<>();
         List<Intent> subIntents;
         List<TargetApk> apks = getTargetApkByTag(tag);
-        if(apks==null){
-            Log.i("LZH","apks is null");
+        if(apks==null||apks.isEmpty()){
+            Log.i("LZH","apks is empty or null");
             return null;
         }
         for(TargetApk apk:apks){
@@ -51,17 +56,17 @@ public class SearchThread {
 
     private List<TargetApk> getTargetApkByTag(String tag){
         ArrayList<TargetApk> apks = new ArrayList<>();
-        List<String> apkNames = tag2App.get(tag);
+        List<Class> apkClazz = tag2App.get(tag);
         ClassLoader cl = ClassLoader.getSystemClassLoader();
         IntentAdapter intentAdapter;
         TargetApk targetApk;
-        if(apkNames==null){
+        if(apkClazz==null){
             Log.i("LZH","apkNames is null");
             return null;
         }
-        for(String name:apkNames){
+        for(Class clazz:apkClazz){
             try {
-                intentAdapter = (IntentAdapter) cl.loadClass(name).newInstance();
+                intentAdapter = (IntentAdapter) clazz.newInstance();
                 intentAdapter.setContext(context);
                 targetApk = new TargetApk();
                 targetApk.setTag2adapter(tag,intentAdapter);
@@ -69,8 +74,6 @@ public class SearchThread {
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
