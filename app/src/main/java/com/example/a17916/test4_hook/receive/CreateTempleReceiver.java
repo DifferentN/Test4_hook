@@ -12,6 +12,7 @@ import android.view.View;
 import com.example.a17916.test4_hook.TestGenerateTemple.TestGenerateTemple;
 import com.example.a17916.test4_hook.manageActivity.ActivityController;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
+import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 import com.example.a17916.test4_hook.view_data.MyViewNode;
 import com.example.a17916.test4_hook.view_data.MyViewTree;
 
@@ -33,8 +34,8 @@ public class CreateTempleReceiver extends BroadcastReceiver {
                 if(selfActivityName.compareTo(showActivityName)==0){
                     sendViewTree(targetActivity);
                 }
-            case MonitorActivityReceiver.ON_RESUME_STATE:
-                showActivityName = intent.getStringExtra(MonitorActivityReceiver.OPENED_ACTIVITY_NAME);
+            case MonitorActivityService.ON_RESUME_STATE:
+                showActivityName = intent.getStringExtra(MonitorActivityService.OPENED_ACTIVITY_NAME);
 
         }
     }

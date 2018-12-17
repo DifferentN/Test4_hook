@@ -10,6 +10,7 @@ public class ControllerReciver extends BroadcastReceiver {
     private MonitorActivityService.TransportBinder transportBinder = null;
     private MonitorActivityService monitorService;
     private String packageName = "";
+    private String text;
     private Intent tarIntent;
     public ControllerReciver(MonitorActivityService.TransportBinder transportBinder){
         this.transportBinder = transportBinder;
@@ -26,6 +27,10 @@ public class ControllerReciver extends BroadcastReceiver {
                 monitorService.openActivity(packageName,tarIntent);
                 break;
             case ActivityController.SEND_INTENT_MOTION:
+                packageName = intent.getStringExtra(ActivityController.PK_NAME);
+                tarIntent = intent.getParcelableExtra(ActivityController.TARGET_INTENT);
+                text = intent.getStringExtra(ActivityController.TEXT);
+                monitorService.openActivityWithMotionEvent(packageName,tarIntent,text);
                 break;
         }
     }

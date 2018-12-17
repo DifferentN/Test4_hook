@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.renderscript.ScriptGroup;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -17,6 +18,7 @@ import android.widget.FrameLayout;
 
 import com.example.a17916.test4_hook.R;
 import com.example.a17916.test4_hook.receive.CreateTempleReceiver;
+import com.example.a17916.test4_hook.receive.InputTextReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.view.CreateTempleView;
 import com.example.a17916.test4_hook.view.FloatView;
@@ -109,6 +111,11 @@ public class FloatViewManager {
                 Intent intent = new Intent();
                 intent.setAction(CreateTempleReceiver.CREATE_TEMPLE);
                 context.sendBroadcast(intent);
+
+//                Intent intent = new Intent();
+//                intent.setAction(LocalActivityReceiver.INPUT_TEXT);
+//                context.sendBroadcast(intent);
+
             }
         });
 

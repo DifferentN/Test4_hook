@@ -11,6 +11,8 @@ import android.os.Parcel;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.example.a17916.test4_hook.TestGenerateTemple.AnalysePageRawDataTool;
 import com.example.a17916.test4_hook.TestGenerateTemple.PageResult;
@@ -24,16 +26,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class LocalActivityReceiver extends BroadcastReceiver {
-    private Activity targetActivity;
-    private Activity curActivity;
+    private Activity selfActivity;
     public static final String findView = "findView";
     public static final String intent = "intent";
     public static final String viewTree = "viewTree";
     public static final String currentActivity = "currentActivity";
     public static final String openTargetActivityByIntentInfo = "openTargetActivityByIntentInfo";
     public static final String openTargetActivityByIntent = "openTargetActivityByIntent";
+    public static final String INPUT_TEXT = "INPUT_TEXT";
+    public static final String TEXT_KEY = "TEXT_KEY";
+    public static final String INPUT_EVENT = "INPUT_EVENT";
+    public static final String EVENTS = "EVENTS";
 
     public static final String fromActivityStart ="fromActivityStart";
+    public static final String fromActivityPlay = "fromActivityPlay";
     public static final String TARGET_INTENT = "targetIntent";
     public static final String targetActivityName = "targetActivityName";
     public static final String targetPackageName = "targetPackageName";
@@ -41,13 +47,16 @@ public class LocalActivityReceiver extends BroadcastReceiver {
     private String showActivityName = "";
     private String selfActivityName = "";
     private String curPackageName = "";
+    private String textKey ;
+    private byte[] eventBytes;
+    private String startActivityFrom;
 
     private HashMap<String ,Integer> startActivity;
     private boolean isOpen,isAtSameApp;
     private String packageName,tarActivityName,dataUri;
 
     public LocalActivityReceiver(Activity activity){
-        targetActivity = activity;
+        selfActivity = activity;
         selfActivityName = activity.getComponentName().getClassName();
         startActivity = new HashMap<>();
     }
@@ -65,7 +74,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
 
                     Intent openInfo = getShowIntent(pageResults);
 //                    openInfo.putExtra("info",info);
-                    targetActivity.startActivity(openInfo);
+                    selfActivity.startActivity(openInfo);
                     Log.i("LZH","open window");
                 }else{
 //                    Log.i("LZH","not open window "+selfActivityName+"  show "+showActivityName);
@@ -81,54 +90,63 @@ public class LocalActivityReceiver extends BroadcastReceiver {
                 break;
             case LocalActivityReceiver.openTargetActivityByIntent:
                 Intent tarIntent = intent.getParcelableExtra(LocalActivityReceiver.TARGET_INTENT);
-                String startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityStart);
+                startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityStart);
+                Log.i("LZH","self: "+selfActivityName+"start: "+startActivityFrom);
                 if(startActivityFrom.compareTo(selfActivityName)!=0){
                     break;
                 }
-                Log.i("LZH","open activity");
-                targetActivity.startActivity(tarIntent);
-//                packageName = "com.douban.movie";//com.yongche.android
-//                tarActivityName = "com.douban.frodo.subject.activity.LegacySubjectActivity";
-//                pkName = "com.yongche.android";
+                Log.i("LZH","从"+selfActivityName+"打开"+startActivityFrom);
 
-//                packageName = tarIntent.getComponent().getPackageName();
-//                tarActivityName = tarIntent.getComponent().getClassName();
-//
-//
-////                tarActivityName = "com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity";
-//                //com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity
-//                ComponentName c2 = targetActivity.getComponentName();
-//                isOpen = showActivityName.compareTo(tarActivityName)==0;
-//                isAtSameApp = curPackageName.compareTo(packageName)==0&&c2.getPackageName().compareTo(packageName)==0;
-//                if (!isOpen&&isAtSameApp) {
-//                    if(showActivityName.contains("Main")&&showActivityName.compareTo(c2.getClassName())==0){
-//                        targetActivity.startActivity(tarIntent);
-//                    }
-//                }else if(isOpen&&showActivityName.compareTo(c2.getClassName())==0){
-//                    //&&showActivityName.compareTo(c2.getClassName())==0
-//                    Log.i("LZH","selfActivity Name: "+c2.getClassName()+"replay TouchEvent");
-//                    notifyActivityHasOpened(targetActivity);
-//                    Bundle bundle2 = intent.getBundleExtra("event");
-//                    byte[] bytes = bundle2.getByteArray("motionEvents");
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-////                    playMotionEvent(bytes);
-//                }
-
+                selfActivity.startActivity(tarIntent);
+                break;
+            case LocalActivityReceiver.INPUT_TEXT:
+                textKey = intent.getStringExtra(LocalActivityReceiver.TEXT_KEY);
+                startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityPlay);
+                if(startActivityFrom.compareTo(selfActivityName)!=0){
+                    break;
+                }
+                Log.i("LZH","输入text");
+                inputText(textKey);
+                break;
+            case LocalActivityReceiver.INPUT_EVENT:
+                eventBytes = intent.getByteArrayExtra(LocalActivityReceiver.EVENTS);
+                startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityPlay);
+                if(startActivityFrom.compareTo(selfActivityName)!=0){
+                    break;
+                }
+                playMotionEvent(eventBytes);
                 break;
         }
     }
 
-    private void notifyActivityHasOpened(Activity activity){
-        Intent intent = new Intent();
-        intent.setAction(MonitorActivityService.opened);
-//        intent.setAction(OpenActivityService.testHasOpen);
-        activity.sendBroadcast(intent);
 
+    private void inputText(String textKey) {
+        View view = selfActivity.getWindow().getDecorView();
+        EditText editText = findEditText(view);
+        if(editText==null){
+            Log.i("LZH","未找到EditText");
+        }
+        editText.setText(textKey);
     }
+    private EditText findEditText(View view){
+        ArrayList<View> list = new ArrayList<>();
+        list.add(view);
+        View cur;
+        ViewGroup viewGroup;
+        while (!list.isEmpty()){
+            cur = list.remove(0);
+            if(cur instanceof ViewGroup){
+                viewGroup = (ViewGroup) cur;
+                for(int i=0;i<viewGroup.getChildCount();i++){
+                    list.add(viewGroup.getChildAt(i));
+                }
+            }else if(cur instanceof EditText){
+                return (EditText) cur;
+            }
+        }
+        return null;
+    }
+
     private Intent getShowIntent(ArrayList<PageResult> pageResults){
         Intent intent = new Intent();
 //        ComponentName componentName = new ComponentName("com.example.a17916.test4_hook","com.example.a17916.test4_hook.activity.ShowActivity");
@@ -141,8 +159,8 @@ public class LocalActivityReceiver extends BroadcastReceiver {
         String res = "";
 
         Uri saveLogUri = Uri.parse("content://com.example.a17916.test4_hook.provider/save_log");
-        View mDecorView = targetActivity.getWindow().getDecorView();
-        ComponentName componentName= targetActivity.getComponentName();
+        View mDecorView = selfActivity.getWindow().getDecorView();
+        ComponentName componentName= selfActivity.getComponentName();
         MyViewTree viewTree = new MyViewTree(mDecorView,componentName.getPackageName(),componentName.getShortClassName());
         MyViewNode viewNode = viewTree.getViewNode();
 
@@ -162,8 +180,8 @@ public class LocalActivityReceiver extends BroadcastReceiver {
     private void sendViewTree(Context context){
 
         Uri saveLogUri = Uri.parse("content://com.example.a17916.test4_hook.provider/save_log");
-        View mDecorView = targetActivity.getWindow().getDecorView();
-        ComponentName componentName= targetActivity.getComponentName();
+        View mDecorView = selfActivity.getWindow().getDecorView();
+        ComponentName componentName= selfActivity.getComponentName();
         MyViewTree viewTree = new MyViewTree(mDecorView,componentName.getPackageName(),componentName.getShortClassName());
         MyViewNode viewNode = viewTree.getViewNode();
 
@@ -171,26 +189,22 @@ public class LocalActivityReceiver extends BroadcastReceiver {
         TestGenerateTemple testGenerateTemple = new TestGenerateTemple(componentName.getClassName(),componentName.getPackageName());
         testGenerateTemple.createTemplate(viewNode);
 
-        context.getContentResolver().query(saveLogUri,new String[]{targetActivity.getClass().getName(), context.getPackageName()},"tree",null,viewNode.toString());
+        context.getContentResolver().query(saveLogUri,new String[]{selfActivity.getClass().getName(), context.getPackageName()},"tree",null,viewNode.toString());
     }
 
-    private String getIntentInfo(Intent intent){
-        String res = "";
-        ComponentName componentName = intent.getComponent();
-
-        String tarActivity = componentName.getClassName();
-        String action = intent.getAction();
-        String type = intent.getType();
-        String data = intent.getDataString();
-        String scheme = intent.getScheme();
-        return res+="action: "+action+" type: "+type+" data: "+data+" scheme: "+scheme+" tarActivity: "+tarActivity;
-    }
     private void playMotionEvent(byte[] bytes) {
+        //延时1s，回放点击事件，保证view已经被刷新出来
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         MotionEvent[] motionEvents = tranformtoMotionEvent(bytes);
         MotionEvent curEvent;
         for(int i=0;i<motionEvents.length;i++){
             curEvent = MotionEvent.obtain(motionEvents[i]);
-            targetActivity.dispatchTouchEvent(curEvent);
+            selfActivity.dispatchTouchEvent(curEvent);
 //            targetActivity.dispatchTouchEvent(motionEvents[i]);
             Log.i("LZH","x: "+curEvent.getRawX()+" y: "+curEvent.getRawY());
         }

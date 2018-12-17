@@ -42,7 +42,7 @@
             android:name="xposedminversion"
             android:value="54" />
 
-        <service android:name=".DetectionService"
+        <service android:name=".accessibilityService.InputTextService"
             android:enabled="true"
             android:exported="true"
             android:label="@string/accessibility_tip"

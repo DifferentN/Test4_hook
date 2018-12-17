@@ -59,7 +59,6 @@ public class SavePreference {
         parcel.setDataPosition(0);
         Intent intent = parcel.readParcelable(Intent.class.getClassLoader());
         return intent;
-
     }
     private byte[] transformToBytes(Intent intent){
         Parcel parcel = Parcel.obtain();

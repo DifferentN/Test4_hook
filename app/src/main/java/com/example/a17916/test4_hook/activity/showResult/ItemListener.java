@@ -34,15 +34,9 @@ public class ItemListener implements RecyclerViewItemListener {
 //        Intent intent  = context.getPackageManager().getLaunchIntentForPackage(packageName);
 
         ActivityController controller = ActivityController.getInstance(context);
-        controller.openActivity(packageName,tarIntent);
-//        Intent openActivity = new Intent();
-//        openActivity.setAction(MonitorActivityService.openByIntent);
-//        openActivity.putExtra(LocalActivityReceiver.targetPackageName,packageName);
-//        openActivity.putExtra(LocalActivityReceiver.targetActivityName,activityName);
-//        openActivity.putExtra("tarIntent",tarIntent);
-//        context.sendBroadcast(openActivity);
-//
-//        context.startActivity(intent);
+        //
+//        controller.openActivity(packageName,tarIntent);
+        controller.openActivityWithMotionEvent(packageName,tarIntent,item.getNodeValue());
     }
 
 

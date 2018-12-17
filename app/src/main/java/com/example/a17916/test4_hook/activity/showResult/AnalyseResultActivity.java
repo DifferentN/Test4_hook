@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.example.a17916.test4_hook.R;
 import com.example.a17916.test4_hook.TestGenerateTemple.PageResult;
@@ -49,6 +50,7 @@ public class AnalyseResultActivity extends AppCompatActivity {
         for(PageResult pageResult:pageResults){
             entityType = pageResult.getEntityType();
             entityValue = pageResult.getNodeValue();
+            Log.i("LZH","value: "+entityValue);
             jsonObject = new JSONObject();
             try {
                 jsonObject.put(entityType,entityValue);

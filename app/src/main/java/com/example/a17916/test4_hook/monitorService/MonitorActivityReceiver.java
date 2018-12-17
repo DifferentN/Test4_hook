@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.MotionEvent;
 
 import com.example.a17916.test4_hook.manageActivity.ActivityController;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
@@ -18,22 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MonitorActivityReceiver extends BroadcastReceiver {
-
-    public static final String openActivity = "openActivity";
-    public static final String opened = "hasOpened";
-    public static final String openByIntent = "openActivityByIntent";
-    public static final String openByIntentInfo = "openActivityByIntentInfo";
-
-    public static final String ON_CREATE_STATE = "onCreateActivity";
-    public static final String ON_RESUME_STATE = "onResumeActivity";
-    public static final String ON_DESTROY_STATE = "onDestroyActivity";
-
-    public static final String OPENED_PACKAGE_NAME = "openedPackageName";
-    public static final String OPENED_ACTIVITY_NAME = "openedActivityName";
-    public static final String DESTROY_PACKAGE_NAME = "destroyPackageName";
-    public static final String DESTROY_ACTIVITY_NAME = "destroyActivityName";
-
+public class MonitorActivityReceiver extends BroadcastReceiver implements Operation{
     private String targetActivityName;
     private String targetPackageName;
     private String currentPackageName;
@@ -53,15 +39,21 @@ public class MonitorActivityReceiver extends BroadcastReceiver {
 
     private ArrayMap<String,Boolean> mapIsOpened;
 
+    private boolean isPlayEvent = false;
+    private String text;
+    private byte[] eventBytes;
+
     //记录App打开的页面，当>=2个时，打开目标页面
     private ArrayMap<String,HashMap<String,Boolean>> record;
     private HashMap<String,Boolean> hashMap;
+    private MyActivityHandler myHandler;
     public MonitorActivityReceiver(Service service){
         this.service = service;
         savePreference = SavePreference.getInstance(service);
         liveActivity = new ArrayList<>();
         mapIsOpened = new ArrayMap<>();
         record = new ArrayMap<>();
+        myHandler = MyActivityHandler.getInstance();
     }
 
     @Override
@@ -69,11 +61,14 @@ public class MonitorActivityReceiver extends BroadcastReceiver {
         String action = intent.getAction();
         String pkName = "",activityName = "";
         switch (action){
-            case MonitorActivityReceiver.ON_CREATE_STATE:
+            case MonitorActivityService.ON_CREATE_STATE:
+                myHandler.onCreateActivity(this,intent);
                 break;
-            case MonitorActivityReceiver.ON_RESUME_STATE:
-                pkName = intent.getStringExtra(OPENED_PACKAGE_NAME);
-                activityName = intent.getStringExtra(OPENED_ACTIVITY_NAME);
+            case MonitorActivityService.ON_RESUME_STATE:
+                myHandler.onResumeActivity(this,intent);
+                pkName = intent.getStringExtra(MonitorActivityService.OPENED_PACKAGE_NAME);
+                Log.i("LZH","resume pkName: "+pkName);
+                activityName = intent.getStringExtra(MonitorActivityService.OPENED_ACTIVITY_NAME);
 
                 hashMap = record.get(pkName);
                 if(hashMap==null){
@@ -89,12 +84,15 @@ public class MonitorActivityReceiver extends BroadcastReceiver {
                 }
                 liveActivity.add(activityName);
                 needOpenActivity(pkName,activityName);
+                needPlayEvent(activityName);
                 break;
-            case MonitorActivityReceiver.ON_DESTROY_STATE:
-                pkName = intent.getStringExtra(DESTROY_PACKAGE_NAME);
-                activityName = intent.getStringExtra(DESTROY_ACTIVITY_NAME);
+            case MonitorActivityService.ON_DESTROY_STATE:
+                myHandler.onDestroyActivity(this,intent);
+                pkName = intent.getStringExtra(MonitorActivityService.DESTROY_PACKAGE_NAME);
+                activityName = intent.getStringExtra(MonitorActivityService.DESTROY_ACTIVITY_NAME);
+                Log.i("LZH","destroy pkName: "+pkName);
                 hashMap = record.get(pkName);
-                if(hashMap.get(pkName)!=null){
+                if(hashMap!=null&&hashMap.get(pkName)!=null){
                     hashMap.remove(pkName);
                 }
                 break;
@@ -118,18 +116,33 @@ public class MonitorActivityReceiver extends BroadcastReceiver {
         liveActivity.clear();
     }
 
-    private void openActivity() {
-        switch (openWay){
-            case openByIntent:
-                openActivityByIntent();
-                break;
-            case openByIntentInfo:
-                break;
-            case opened:
-                break;
+    private void needPlayEvent(String activityName){
+        Log.i("LZH","isPlayEvent: "+isPlayEvent+"activityName: "+targetActivityName);
+        if(!isPlayEvent||activityName.compareTo(targetActivityName)!=0){
+            return;
         }
+        //检查是否要输入搜索词
+        needInputText();
+
+        Intent intent = new Intent();
+        intent.setAction(LocalActivityReceiver.INPUT_EVENT);
+        intent.putExtra(LocalActivityReceiver.EVENTS,eventBytes);
+        intent.putExtra(LocalActivityReceiver.fromActivityPlay,targetActivityName);
+        service.sendBroadcast(intent);
+        isPlayEvent = false;
     }
 
+    private void needInputText(){
+        Log.i("LZH","发送"+text);
+        if(text==null){
+            return;
+        }
+        Intent intent = new Intent();
+        intent.setAction(LocalActivityReceiver.INPUT_TEXT);
+        intent.putExtra(LocalActivityReceiver.TEXT_KEY,text);
+        intent.putExtra(LocalActivityReceiver.fromActivityPlay,targetActivityName);
+        service.sendBroadcast(intent);
+    }
 
     private void openActivityByIntent() {
         if(tarIntent==null){
@@ -143,9 +156,23 @@ public class MonitorActivityReceiver extends BroadcastReceiver {
         openActivity.setAction(LocalActivityReceiver.openTargetActivityByIntent);
         service.sendBroadcast(openActivity);
     }
-    private byte[] getMotionEvents(String activityName){
-        String key = activityName+"/MotionEvent";
+    private byte[] getMotionEvents(String activityName,String text){
+        if(text==null){
+            Log.i("LZH","text为null，无法获得点击事件");
+            return null;
+        }
+        String key = activityName+"/"+text;
         return savePreference.readMotionEventsByte(key);
+    }
+
+    public void setMotionEvent(String activityName,String key){
+        text = key;
+        eventBytes = getMotionEvents(activityName,key);
+        if(eventBytes==null){
+            Log.i("LZH","无法获取点击事件,activityName: "+activityName+" key: "+key);
+            return;
+        }
+        isPlayEvent = true;
     }
 
     public void setTargetIntent(Intent intent){
@@ -156,5 +183,20 @@ public class MonitorActivityReceiver extends BroadcastReceiver {
         resetState();
         mapIsOpened.put(targetActivityName,false);
         toOpenActivity = true;
+    }
+
+    @Override
+    public void operationStartActivity(Intent intent) {
+
+    }
+
+    @Override
+    public void operationReplayInputEvent(String text) {
+
+    }
+
+    @Override
+    public void operationReplayMotionEvent(byte[] events) {
+
     }
 }

@@ -30,7 +30,7 @@ public class ActivityOnResumeHook extends XC_MethodHook {
         Activity activity = (Activity) param.thisObject;
         ComponentName componentName = activity.getComponentName();
         String activityName = componentName.getClassName();
-        Log.i("LZH","after resume "+componentName.getClassName()+" time "+SystemClock.currentThreadTimeMillis());
+        Log.i("LZH","after resume "+componentName.getClassName()+" pkName "+componentName.getPackageName());
 
         Intent intent = new Intent();
         intent.setAction(LocalActivityReceiver.currentActivity);
@@ -46,14 +46,14 @@ public class ActivityOnResumeHook extends XC_MethodHook {
 //        activity.sendBroadcast(broad);
 
         Intent broad = new Intent();
-        broad.setAction(MonitorActivityReceiver.ON_RESUME_STATE);
-        broad.putExtra(MonitorActivityReceiver.OPENED_PACKAGE_NAME,componentName.getPackageName());
-        broad.putExtra(MonitorActivityReceiver.OPENED_ACTIVITY_NAME,componentName.getClassName());
+        broad.setAction(MonitorActivityService.ON_RESUME_STATE);
+        broad.putExtra(MonitorActivityService.OPENED_PACKAGE_NAME,componentName.getPackageName());
+        broad.putExtra(MonitorActivityService.OPENED_ACTIVITY_NAME,componentName.getClassName());
         activity.sendBroadcast(broad);
 
         //测试中，保存打开应用的Intent
         Intent saveIntent = new Intent();
-        saveIntent.setAction(MonitorActivityService.saveIntent);
+        saveIntent.setAction(MonitorActivityService.SAVE_INTENT);
         saveIntent.putExtra("opendActivityIntent",activity.getIntent());
         saveIntent.putExtra("openActivityName",activity.getComponentName().getClassName());
         activity.sendBroadcast(saveIntent);

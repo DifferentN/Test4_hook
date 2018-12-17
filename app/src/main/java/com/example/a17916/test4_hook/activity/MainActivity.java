@@ -26,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         StartSendDataService();
-
     }
 
     public void startFloatBt(View view){
@@ -65,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         ActivityController controller = ActivityController.getInstance(getApplicationContext());
         controller.openActivity("com.douban.movie",getTarIntent("com.douban.frodo.subject.activity.LegacySubjectActivity"));
 //        openCreateIntent();
+
     }
     public void openCreateIntent(){
         int time = 0;

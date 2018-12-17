@@ -10,7 +10,9 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
+import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 import com.example.a17916.test4_hook.receive.CreateTempleReceiver;
+import com.example.a17916.test4_hook.receive.InputTextReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 
 import de.robv.android.xposed.XC_MethodHook;
@@ -41,18 +43,28 @@ public class ActivityOnCreateHook extends XC_MethodHook {
 
         Activity activity = (Activity) param.thisObject;
         String activityName = activity.getClass().getName();
+        Intent intent = new Intent();
+        intent.setAction(MonitorActivityService.ON_CREATE_STATE);
+        activity.sendBroadcast(intent);
 
 //        KLog.v("liuyi","=======onCreate========: " + activityName);
 
 
-        Intent intent = activity.getIntent();
 //        Log.i("LZH",activity.getComponentName().getPackageName());
 //        print(activity.getComponentName().getClassName(),intent);
-        Uri data = intent.getData();
+
 
 //        KLog.v(BuildConfig.GETVIEW, "#*#*#*#*#*#*# enable receiver in: " + activityName);
         injectReceiver(context, activity);
         injectCreateTempleReceiver(activity);
+        testinject(activity);
+    }
+
+    private void testinject(Activity activity) {
+        InputTextReceiver inputTextReceiver = new InputTextReceiver(activity);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(InputTextReceiver.INPUT_TEXT);
+        activity.registerReceiver(inputTextReceiver,filter);
     }
 
     private void injectReceiver(Context context, Activity activity) {
@@ -81,6 +93,8 @@ public class ActivityOnCreateHook extends XC_MethodHook {
         filter.addAction(LocalActivityReceiver.currentActivity);
         filter.addAction(LocalActivityReceiver.openTargetActivityByIntent);
         filter.addAction(LocalActivityReceiver.openTargetActivityByIntentInfo);
+        filter.addAction(LocalActivityReceiver.INPUT_TEXT);
+        filter.addAction(LocalActivityReceiver.INPUT_EVENT);
         XposedHelpers.setAdditionalInstanceField(activity, "iasReceiver", receiver);
         activity.registerReceiver(receiver,filter);
 //        Log.i("LZH","register activity: "+componentName.getClassName());
@@ -90,7 +104,7 @@ public class ActivityOnCreateHook extends XC_MethodHook {
         CreateTempleReceiver receiver = new CreateTempleReceiver(activity);
         IntentFilter filter = new IntentFilter();
         filter.addAction(CreateTempleReceiver.CREATE_TEMPLE);
-        filter.addAction(MonitorActivityReceiver.ON_RESUME_STATE);
+        filter.addAction(MonitorActivityService.ON_RESUME_STATE);
         XposedHelpers.setAdditionalInstanceField(activity, "iasCreateTempleReceiver", receiver);
         activity.registerReceiver(receiver,filter);
     }

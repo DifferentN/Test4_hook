@@ -12,6 +12,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.TextView;
 
 import com.example.a17916.test4_hook.diskSave.DiskSave;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
@@ -45,8 +46,9 @@ public class IASXposedModule implements IXposedHookLoadPackage {
 
         XposedHelpers.findAndHookMethod("android.app.Activity", loadPackageParam.classLoader, "onCreate", Bundle.class, new ActivityOnCreateHook(loadPackageParam));
         XposedHelpers.findAndHookMethod("android.app.Activity", loadPackageParam.classLoader, "onResume", new ActivityOnResumeHook());
-        XposedHelpers.findAndHookMethod("android.app.Activity",loadPackageParam.classLoader,"dispatchTouchEvent",MotionEvent.class,new ActivityOnTouchEventHook());
-        XposedHelpers.findAndHookMethod("android.app.Activity",loadPackageParam.classLoader,"getIntent",new TestHookMethod());
+        XposedHelpers.findAndHookMethod("android.app.Activity",loadPackageParam.classLoader,"dispatchTouchEvent",MotionEvent.class,new ActivityDispatchTouchEventHook());
+        XposedHelpers.findAndHookMethod("android.view.View",loadPackageParam.classLoader,"onTouchEvent",MotionEvent.class,new ViewOnTouchEventHook());
+        XposedHelpers.findAndHookMethod("android.app.Activity",loadPackageParam.classLoader,"startActivityForResult",Intent.class,int.class,Bundle.class,new TestActivityStartActivityForResult());
 //        XposedHelpers.findAndHookMethod("android.support.v7.widget.RecyclerView",loadPackageParam.classLoader,"onTouchEvent",MotionEvent.class,new RecyclerViewOnTouchEventHook());
 //        XposedHelpers.findAndHookMethod("android.view.ViewGroup",loadPackageParam.classLoader,"dispatchTouchEvent",MotionEvent.class,new ViewGroupDispatchTouchEventHook());
 //        XposedHelpers.findAndHookMethod("android.view.ViewGroup",loadPackageParam.classLoader,"dispatchTransformedTouchEvent",MotionEvent.class,boolean.class,View.class,int.class,new VGdispatchTransformedTouchEventHook());
@@ -79,9 +81,9 @@ public class IASXposedModule implements IXposedHookLoadPackage {
                     XposedHelpers.setAdditionalInstanceField(param.thisObject, "iasCreateTempleReceiver", null);
                 }
                 Intent broad = new Intent();
-                broad.setAction(MonitorActivityReceiver.ON_DESTROY_STATE);
-                broad.putExtra(MonitorActivityReceiver.DESTROY_PACKAGE_NAME,componentName.getPackageName());
-                broad.putExtra(MonitorActivityReceiver.DESTROY_ACTIVITY_NAME,componentName.getClassName());
+                broad.setAction(MonitorActivityService.ON_DESTROY_STATE);
+                broad.putExtra(MonitorActivityService.DESTROY_PACKAGE_NAME,componentName.getPackageName());
+                broad.putExtra(MonitorActivityService.DESTROY_ACTIVITY_NAME,componentName.getClassName());
                 activity.sendBroadcast(broad);
             }
         });
@@ -188,11 +190,11 @@ public class IASXposedModule implements IXposedHookLoadPackage {
                 activity.sendBroadcast(broad);
 
                 //测试中，保存打开应用的Intent
-                Intent saveIntent = new Intent();
-                saveIntent.setAction(MonitorActivityService.saveIntent);
-                saveIntent.putExtra("opendActivityIntent",activity.getIntent());
-                saveIntent.putExtra("openActivityName",activity.getComponentName().getClassName());
-                activity.sendBroadcast(saveIntent);
+//                Intent saveIntent = new Intent();
+//                saveIntent.setAction(MonitorActivityService.saveIntent);
+//                saveIntent.putExtra("opendActivityIntent",activity.getIntent());
+//                saveIntent.putExtra("openActivityName",activity.getComponentName().getClassName());
+//                activity.sendBroadcast(saveIntent);
 //                saveIntent(componentName.getClassName(),activity.getIntent());
 
 
