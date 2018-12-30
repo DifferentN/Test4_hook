@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 
+
+import com.example.a17916.test4_hook.TempGenerateDataBase.GenerateDataService;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
@@ -40,22 +42,19 @@ public class ActivityOnResumeHook extends XC_MethodHook {
         intent.putExtra("currentActivity",bundle);
         activity.sendBroadcast(intent);
 
-//        //给服务发送打开命令，打开指定activity
-//        Intent broad = new Intent();
-//        broad.setAction(MonitorActivityService.openActivity);
-//        activity.sendBroadcast(broad);
-
         Intent broad = new Intent();
         broad.setAction(MonitorActivityService.ON_RESUME_STATE);
-        broad.putExtra(MonitorActivityService.OPENED_PACKAGE_NAME,componentName.getPackageName());
-        broad.putExtra(MonitorActivityService.OPENED_ACTIVITY_NAME,componentName.getClassName());
+        broad.putExtra(MonitorActivityService.RESUME_PACKAGE_NAME,componentName.getPackageName());
+        broad.putExtra(MonitorActivityService.RESUME_ACTIVITY_NAME,componentName.getClassName());
         activity.sendBroadcast(broad);
 
         //测试中，保存打开应用的Intent
+
+
         Intent saveIntent = new Intent();
-        saveIntent.setAction(MonitorActivityService.SAVE_INTENT);
-        saveIntent.putExtra("opendActivityIntent",activity.getIntent());
-        saveIntent.putExtra("openActivityName",activity.getComponentName().getClassName());
+        saveIntent.setAction(GenerateDataService.SAVE_INTENT);
+        saveIntent.putExtra(GenerateDataService.NEED_SAVE_INTENT,activity.getIntent());
+        saveIntent.putExtra(GenerateDataService.ACTIVITY_NAME,activity.getComponentName().getClassName());
         activity.sendBroadcast(saveIntent);
 
     }

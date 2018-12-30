@@ -1,6 +1,7 @@
 package com.example.a17916.test4_hook.monitorService;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -37,27 +38,16 @@ public class SaveMotionReceiver extends BroadcastReceiver {
             case MonitorActivityService.saveIntentInfo:
                 break;
             case MonitorActivityService.SAVE_MOTION_EVENT:
-                if(prepareSaveEvent){
-                    Log.i("LZH","save MotionEvent");
-                    tempSaveMotionEvent(intent);
-                }
-
-//                Bundle bundle = intent.getBundleExtra("MotionEvent");
-//                motionEventKey = bundle.getString("eventKey");
-//                bytes = bundle.getByteArray("MotionEvents");
-//                saveMotionEvent(motionEventKey,bytes);
+                tempSaveMotionEvent(intent);
             case MonitorActivityService.SAVE_EDIT_TEXT:
                 prepareSaveEvent = true;
                 editText = intent.getStringExtra(MonitorActivityService.EDIT_TEXT);
-                Log.i("LZH","editText: "+editText);
                 break;
             case MonitorActivityService.ON_CREATE_STATE:
-                saveMotionEvent(saveActivity,editText);
-//                Log.i("LZH","save at create");
                 break;
             case MonitorActivityService.ON_RESUME_STATE:
-//                Log.i("LZH","save at resume");
-                saveMotionEvent(saveActivity,editText);
+                saveMotionEvent();
+                saveActivity = intent.getStringExtra(MonitorActivityService.RESUME_ACTIVITY_NAME);
                 break;
         }
     }
@@ -73,33 +63,31 @@ public class SaveMotionReceiver extends BroadcastReceiver {
         preference.writeIntent(key,opendIntent);
     }
 
-//    private void saveMotionEvent(String motionEventKey, byte[] bytes) {
-//        preference.writeMotionEvent(motionEventKey,bytes);
-//    }
-
     private void tempSaveMotionEvent(Intent intent){
         byte[] bytes = intent.getByteArrayExtra(MonitorActivityService.MOTION_EVENT);
         saveActivity = intent.getStringExtra(MonitorActivityService.EVENT_ACTIVITY);
         MotionEvent event = transformToMotionEvent(bytes);
         preEvents.add(event);
     }
-    //用类名和输入的搜索词 作为key值
-    private void saveMotionEvent(String activityName,String text){
-        prepareSaveEvent = false;
-//        Log.i("LZH","preEvents size: "+preEvents.size()+" activityName: "+activityName+" text: "+text);
-        if(preEvents.isEmpty()&&activityName!=null&&activityName.length()>0&&text!=null){
+
+    /**
+     * 保存页面的点击事件，以activityName作为点击事件的key值
+     * 保存规则：记录当前页面的点击事件，当页面发生跳转时，将点击事件转化为二进制保存
+     */
+    private void saveMotionEvent(){
+        if(saveActivity==null||preEvents.size()<=0){
+//            Log.i("LZH","无法保存点击事件");
             return ;
         }
-        String key = activityName+"/"+text;
+
         Parcel parcel = writeMotionEvents(preEvents);
         if(parcel==null){
             Log.i("LZH","保存点击事件失败");
             return ;
         }
         bytes = parcel.marshall();
-        Log.i("LZH","保存点击事件，key: "+key);
-        preference.writeMotionEvent(key,bytes);
-        reset();
+        preference.writeMotionEvent(saveActivity+"/MotionEvent",bytes);
+        preEvents.clear();
     }
     private MotionEvent transformToMotionEvent(byte[] bytes){
         Parcel parcel = Parcel.obtain();
@@ -110,9 +98,6 @@ public class SaveMotionReceiver extends BroadcastReceiver {
     }
 
     private Parcel writeMotionEvents(List<MotionEvent> list){
-//        for(MotionEvent event:list){
-////            Log.i("LZH","save event x: "+event.getRawX()+" y: "+event.getRawY());
-//        }
         Parcel parcel = null;
         if(list.size()<=0){
             Log.i("LZH","list size is 0");

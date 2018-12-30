@@ -35,7 +35,7 @@ public class CreateTempleReceiver extends BroadcastReceiver {
                     sendViewTree(targetActivity);
                 }
             case MonitorActivityService.ON_RESUME_STATE:
-                showActivityName = intent.getStringExtra(MonitorActivityService.OPENED_ACTIVITY_NAME);
+                showActivityName = intent.getStringExtra(MonitorActivityService.RESUME_ACTIVITY_NAME);
 
         }
     }

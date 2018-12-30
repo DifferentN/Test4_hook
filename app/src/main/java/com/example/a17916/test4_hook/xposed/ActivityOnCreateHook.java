@@ -42,9 +42,11 @@ public class ActivityOnCreateHook extends XC_MethodHook {
         final Context context = (Context) param.thisObject;
 
         Activity activity = (Activity) param.thisObject;
-        String activityName = activity.getClass().getName();
+        ComponentName componentName = activity.getComponentName();
         Intent intent = new Intent();
         intent.setAction(MonitorActivityService.ON_CREATE_STATE);
+        intent.putExtra(MonitorActivityService.CREATE_PACKAGE_NAME,componentName.getPackageName());
+        intent.putExtra(MonitorActivityService.CREATE_ACTIVITY_NAME,componentName.getClassName());
         activity.sendBroadcast(intent);
 
 //        KLog.v("liuyi","=======onCreate========: " + activityName);

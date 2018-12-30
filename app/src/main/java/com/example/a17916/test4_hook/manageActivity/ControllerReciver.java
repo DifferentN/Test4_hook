@@ -27,11 +27,14 @@ public class ControllerReciver extends BroadcastReceiver {
                 monitorService.openActivity(packageName,tarIntent);
                 break;
             case ActivityController.SEND_INTENT_MOTION:
-                packageName = intent.getStringExtra(ActivityController.PK_NAME);
-                tarIntent = intent.getParcelableExtra(ActivityController.TARGET_INTENT);
-                text = intent.getStringExtra(ActivityController.TEXT);
-                monitorService.openActivityWithMotionEvent(packageName,tarIntent,text);
+//                packageName = intent.getStringExtra(ActivityController.PK_NAME);
+//                tarIntent = intent.getParcelableExtra(ActivityController.TARGET_INTENT);
+//                text = intent.getStringExtra(ActivityController.TEXT);
+//                monitorService.openActivityWithMotionEvent(packageName,tarIntent,text);
                 break;
+            case ActivityController.OPEN_ACTIVITY:
+                packageName = intent.getStringExtra(ActivityController.PK_NAME);
+                monitorService.openApp(packageName);
         }
     }
 }

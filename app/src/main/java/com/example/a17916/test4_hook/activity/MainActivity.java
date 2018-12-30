@@ -9,12 +9,25 @@ import android.util.Log;
 import android.view.View;
 
 import com.example.a17916.test4_hook.R;
+import com.example.a17916.test4_hook.TempGenerateDataBase.GenerateDataService;
 import com.example.a17916.test4_hook.ViewManager.FloatViewManager;
+import com.example.a17916.test4_hook.application.MyApplication;
+import com.example.a17916.test4_hook.database.AppData;
+import com.example.a17916.test4_hook.database.QueryManager;
 import com.example.a17916.test4_hook.manageActivity.ActivityController;
 import com.example.a17916.test4_hook.manageActivity.ControllerService;
+import com.example.a17916.test4_hook.matchModule.taskModule.TaoPiaoPiao.TestTPP;
+import com.example.a17916.test4_hook.matchModule.taskModule.TaskFactory;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+import com.example.a17916.test4_hook.monitorService.MyActivityHandler;
+import com.example.a17916.test4_hook.monitorService.OpenActivityTask;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
+import com.greendao.gen.AppDataDao;
+
+import org.greenrobot.greendao.query.QueryBuilder;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         StartSendDataService();
+        startSaveData();
+
     }
 
     public void startFloatBt(View view){
@@ -42,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
         startService(intent);
     }
 
+    private void startSaveData(){
+        Intent intent = new Intent(this,GenerateDataService.class);
+        startService(intent);
+    }
     public void openDBMovie(View view){
         PackageManager packageManager = getPackageManager();
 
@@ -49,21 +68,22 @@ public class MainActivity extends AppCompatActivity {
 //        com.douban.movie
         intent = packageManager.getLaunchIntentForPackage("com.douban.movie");
         startActivity(intent);
-
-//        Intent broadcast = new Intent();
-//        broadcast.setAction(LocalActivityReceiver.openTargetActivityByIntentInfo);
-//        Bundle bundle = new Bundle();
-//        bundle.putString("packageName","com.example.a17916.test3_1");//com.douban.movie
-////        com.douban.frodo.subject.activity.LegacySubjectActivity
-//        bundle.putString("tarActivityName","com.example.a17916.test3_1.SecondActivity");
-//        bundle.putString("dataUri","douban://douban.com/movie/3168101");
-//        broadcast.putExtras(bundle);
-//        sendBroadcast(broadcast);
     }
     public void openByIntent(View view){
-        ActivityController controller = ActivityController.getInstance(getApplicationContext());
-        controller.openActivity("com.douban.movie",getTarIntent("com.douban.frodo.subject.activity.LegacySubjectActivity"));
-//        openCreateIntent();
+//        ActivityController controller = ActivityController.getInstance(getApplicationContext());
+//        OpenActivityTask task = TaskFactory.getTaskByActivityName("com.douban.frodo.subject.activity.LegacySubjectActivity",getApplicationContext());
+//        task.setSearchText("海王");
+//        task.setMyHandler(MyActivityHandler.getInstance());
+//        controller.addTask("com.douban.movie","com.douban.frodo.subject.activity.LegacySubjectActivity",task);
+
+        QueryManager queryManager = QueryManager.getInstance();
+        List<Intent> intents = queryManager.queryIntents("云南虫谷");
+
+        if(intents.size()<1){
+            Log.i("LZH","查询不到数据");
+        }else{
+            Log.i("LZH","查询到的Intent的数量: "+intents.size());
+        }
 
     }
     public void openCreateIntent(){

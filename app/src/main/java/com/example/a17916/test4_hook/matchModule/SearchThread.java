@@ -38,6 +38,12 @@ public class SearchThread {
 
     }
 
+    /**
+     *  根据本地应用（未做）获取相关Intent
+     * @param tag
+     * @param jsonObject
+     * @return
+     */
     public List<Intent> getIntent(String tag, JSONObject jsonObject){
 
         ArrayList<Intent> intents = new ArrayList<>();

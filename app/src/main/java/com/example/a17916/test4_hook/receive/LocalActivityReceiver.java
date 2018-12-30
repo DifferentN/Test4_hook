@@ -5,6 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -14,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.example.a17916.test4_hook.TempGenerateDataBase.GenerateDataService;
 import com.example.a17916.test4_hook.TestGenerateTemple.AnalysePageRawDataTool;
 import com.example.a17916.test4_hook.TestGenerateTemple.PageResult;
 import com.example.a17916.test4_hook.TestGenerateTemple.TestGenerateTemple;
@@ -74,7 +78,11 @@ public class LocalActivityReceiver extends BroadcastReceiver {
 
                     Intent openInfo = getShowIntent(pageResults);
 //                    openInfo.putExtra("info",info);
-                    selfActivity.startActivity(openInfo);
+                    //添加数据
+                    Intent generateDataIntent = testGenerateData(pageResults);
+                    selfActivity.sendBroadcast(generateDataIntent);
+                    //临时注释
+//                    selfActivity.startActivity(openInfo);
                     Log.i("LZH","open window");
                 }else{
 //                    Log.i("LZH","not open window "+selfActivityName+"  show "+showActivityName);
@@ -217,6 +225,50 @@ public class LocalActivityReceiver extends BroadcastReceiver {
         MotionEvent[] motionEvents = new MotionEvent[size];
         parcel.readTypedArray(motionEvents,MotionEvent.CREATOR);
         return motionEvents;
-
     }
+
+    //用来向数据库中添加数据
+    private Intent testGenerateData(ArrayList<PageResult> pageResults){
+        Intent addDataIntent = new Intent();
+        addDataIntent.setAction(GenerateDataService.GENERATE_DATA);
+        addDataIntent.putExtra(GenerateDataService.ACTIVITY_NAME,selfActivityName);
+        addDataIntent.putParcelableArrayListExtra(GenerateDataService.PAGE_INFO,pageResults);
+
+        String appName = testGetAppName();
+        String version = testGetAppVersion();
+
+        addDataIntent.putExtra(GenerateDataService.VERSION,version);
+        addDataIntent.putExtra(GenerateDataService.APP_NAME,appName);
+
+        return addDataIntent;
+    }
+    private String testGetAppName(){
+        String pkName = selfActivity.getPackageName();
+        PackageManager pm = selfActivity.getPackageManager();
+
+        try {
+            PackageInfo packageInfo = pm.getPackageInfo(pkName,0);
+            int labelRes  = packageInfo.applicationInfo.labelRes;
+//            Log.i("LZH","appName: "+selfActivity.getResources().getString(labelRes));
+            return selfActivity.getResources().getString(labelRes);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    private String testGetAppVersion(){
+        int version = -1;
+        PackageInfo packageInfo;
+        PackageManager pm = selfActivity.getPackageManager();
+        try {
+            packageInfo = pm.getPackageInfo(selfActivity.getPackageName(),PackageManager.GET_CONFIGURATIONS);
+            version = packageInfo.versionCode;
+            return version+"";
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return  null;
+    }
+
+
 }

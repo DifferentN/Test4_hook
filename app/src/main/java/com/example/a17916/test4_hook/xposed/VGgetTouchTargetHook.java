@@ -2,6 +2,7 @@ package com.example.a17916.test4_hook.xposed;
 
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 import de.robv.android.xposed.XC_MethodHook;
 

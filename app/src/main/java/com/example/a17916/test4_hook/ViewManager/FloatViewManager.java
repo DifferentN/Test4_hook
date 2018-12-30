@@ -22,10 +22,12 @@ import com.example.a17916.test4_hook.receive.InputTextReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.view.CreateTempleView;
 import com.example.a17916.test4_hook.view.FloatView;
+import com.example.a17916.test4_hook.view.SaveMotionView;
 
 public class FloatViewManager {
     private FloatView floatView;
     private CreateTempleView createTempleView;
+    private SaveMotionView saveMotionView;
     private static FloatViewManager floatViewManager;
     private WindowManager.LayoutParams layoutParams;
     private Context context;
@@ -115,6 +117,40 @@ public class FloatViewManager {
 //                Intent intent = new Intent();
 //                intent.setAction(LocalActivityReceiver.INPUT_TEXT);
 //                context.sendBroadcast(intent);
+
+            }
+        });
+
+    }
+
+    public void showSaveMotionViewBt(){
+        windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        saveMotionView = new SaveMotionView(context);
+        if(layoutParams == null){
+            layoutParams = new WindowManager.LayoutParams();
+            layoutParams.width = saveMotionView.width;
+            layoutParams.height = saveMotionView.height;
+            layoutParams.gravity = Gravity.TOP|Gravity.RIGHT;
+            layoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
+            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            layoutParams.format = PixelFormat.RGBA_8888;
+
+            layoutParams.x = 0;
+            layoutParams.y = 0;
+        }
+
+        //can't work
+//        ((ViewGroup)activity.getWindow().getDecorView()).addView(floatView);
+        saveMotionView.setLayoutParams(layoutParams);
+        windowManager.addView(saveMotionView,layoutParams);
+
+        saveMotionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("LZH","click createBt");
+                Intent intent = new Intent();
+                intent.setAction(CreateTempleReceiver.CREATE_TEMPLE);
+                context.sendBroadcast(intent);
 
             }
         });

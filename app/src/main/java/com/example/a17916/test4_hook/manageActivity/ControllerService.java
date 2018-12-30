@@ -28,6 +28,7 @@ public class ControllerService extends Service {
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(ActivityController.SEND_INTENT_MOTION);
             intentFilter.addAction(ActivityController.SEND_ACTIVITY_INTENT);
+            intentFilter.addAction(ActivityController.OPEN_ACTIVITY);
             registerReceiver(reciver,intentFilter);
         }
 

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -48,7 +49,10 @@ public class IASXposedModule implements IXposedHookLoadPackage {
         XposedHelpers.findAndHookMethod("android.app.Activity", loadPackageParam.classLoader, "onResume", new ActivityOnResumeHook());
         XposedHelpers.findAndHookMethod("android.app.Activity",loadPackageParam.classLoader,"dispatchTouchEvent",MotionEvent.class,new ActivityDispatchTouchEventHook());
         XposedHelpers.findAndHookMethod("android.view.View",loadPackageParam.classLoader,"onTouchEvent",MotionEvent.class,new ViewOnTouchEventHook());
-        XposedHelpers.findAndHookMethod("android.app.Activity",loadPackageParam.classLoader,"startActivityForResult",Intent.class,int.class,Bundle.class,new TestActivityStartActivityForResult());
+
+        //广播告知当前页面是否已经完成绘制
+        XposedHelpers.findAndHookMethod("android.view.View",loadPackageParam.classLoader,"onDraw",Canvas.class,new EditTextonDrawHook());
+
 //        XposedHelpers.findAndHookMethod("android.support.v7.widget.RecyclerView",loadPackageParam.classLoader,"onTouchEvent",MotionEvent.class,new RecyclerViewOnTouchEventHook());
 //        XposedHelpers.findAndHookMethod("android.view.ViewGroup",loadPackageParam.classLoader,"dispatchTouchEvent",MotionEvent.class,new ViewGroupDispatchTouchEventHook());
 //        XposedHelpers.findAndHookMethod("android.view.ViewGroup",loadPackageParam.classLoader,"dispatchTransformedTouchEvent",MotionEvent.class,boolean.class,View.class,int.class,new VGdispatchTransformedTouchEventHook());

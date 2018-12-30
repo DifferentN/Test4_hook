@@ -44,9 +44,13 @@ public class ActivityDispatchTouchEventHook extends XC_MethodHook {
         intent.putExtra(MonitorActivityService.EVENT_ACTIVITY,componentName.getClassName());
         activity.sendBroadcast(intent);
 
-        needSendText(activity);
+//        needSendText(activity);
     }
 
+    /**
+     * 发送当前页面EditText中的文字
+     * @param activity
+     */
     private void needSendText(Activity activity) {
         View decor = activity.getWindow().getDecorView();
         EditText editText = null;

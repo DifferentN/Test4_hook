@@ -25,19 +25,26 @@ public class MonitorActivityService extends Service{
     public static final String saveIntentInfo = "saveIntentInfo";
     public static final String SAVE_INTENT = "saveIntent";
     public static final String SAVE_MOTION_EVENT = "saveMotionEvent";
-    public static final String MOTION_EVENT = "MOTION_EVENT";
-    public static final String EVENT_ACTIVITY = "EVENT_ACTIVITY";
-    public static final String SAVE_EDIT_TEXT = "SAVE_EDITTEXT";
+    public static final String MOTION_EVENT = "motion_event";
+    public static final String EVENT_ACTIVITY = "event_activity";
+    public static final String SAVE_EDIT_TEXT = "save_edit_text";
     public static final String EDIT_TEXT = "EDIT_TEXT";
 
     public static final String ON_CREATE_STATE = "onCreateActivity";
     public static final String ON_RESUME_STATE = "onResumeActivity";
     public static final String ON_DESTROY_STATE = "onDestroyActivity";
 
-    public static final String OPENED_PACKAGE_NAME = "openedPackageName";
-    public static final String OPENED_ACTIVITY_NAME = "openedActivityName";
+    public static final String CREATE_PACKAGE_NAME = "createPackageName";
+    public static final String CREATE_ACTIVITY_NAME = "createActivityName";
+    public static final String RESUME_PACKAGE_NAME = "resumePackageName";
+    public static final String RESUME_ACTIVITY_NAME = "resumeActivityName";
     public static final String DESTROY_PACKAGE_NAME = "destroyPackageName";
     public static final String DESTROY_ACTIVITY_NAME = "destroyActivityName";
+
+    public static final String ON_DRAW = "onDraw";
+    public static final String VIEW_TYPE = "viewType";
+    public static final int EDITTEXT = 1;
+    public static final int OTHERVIEW = 2;
 
     private String motionEventKey = "";
     private byte[] bytes;
@@ -76,6 +83,7 @@ public class MonitorActivityService extends Service{
         intentFilter.addAction(MonitorActivityService.ON_CREATE_STATE);
         intentFilter.addAction(MonitorActivityService.ON_RESUME_STATE);
         intentFilter.addAction(MonitorActivityService.ON_DESTROY_STATE);
+        intentFilter.addAction(MonitorActivityService.ON_DRAW);
         registerReceiver(openActivityReceiver,intentFilter);
 
         saveMotionRecevier = new SaveMotionReceiver(this);
@@ -93,15 +101,18 @@ public class MonitorActivityService extends Service{
 
     public void openActivity(String packageName,Intent intent){
         openActivityReceiver.setTargetIntent(intent);
-        Intent openApp = getPackageManager().getLaunchIntentForPackage(packageName);
-        startActivity(openApp);
+        openApp(packageName);
     }
 
-    public void openActivityWithMotionEvent(String packageName,Intent intent,String text){
-        ComponentName componentName = intent.getComponent();
-        openActivityReceiver.setMotionEvent(componentName.getClassName(),text);
-        openActivity(packageName,intent);
-
+//    public void openActivityWithMotionEvent(String packageName,Intent intent,String text){
+//        ComponentName componentName = intent.getComponent();
+//        openActivityReceiver.setMotionEvent(componentName.getClassName(),text);
+//        openActivity(packageName,intent);
+//
+//    }
+    public void openApp(String packageName){
+        Intent openApp = getPackageManager().getLaunchIntentForPackage(packageName);
+        startActivity(openApp);
     }
 
 
@@ -136,7 +147,6 @@ public class MonitorActivityService extends Service{
 
 
     public class TransportBinder extends Binder{
-
         public MonitorActivityService getService(){
             return MonitorActivityService.this;
         }

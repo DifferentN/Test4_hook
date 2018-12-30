@@ -5,8 +5,12 @@ import android.view.MotionEvent;
 
 import java.util.List;
 
+/**
+ * 将操作发送给LocalActivityReceiver 执行
+ */
 public interface Operation {
-    void operationStartActivity(Intent intent);
-    void operationReplayInputEvent(String text);
-    void operationReplayMotionEvent(byte[] events );
+
+    void operationStartActivity(Intent intent,String fromActivity);
+    void operationReplayInputEvent(String text,String fromActivity);
+    void operationReplayMotionEvent(byte[] events,String fromActivity);
 }

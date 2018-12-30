@@ -2,20 +2,26 @@ package com.example.a17916.test4_hook.manageActivity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+
+import com.example.a17916.test4_hook.monitorService.MyActivityHandler;
+import com.example.a17916.test4_hook.monitorService.OpenActivityTask;
+import com.example.a17916.test4_hook.share.SavePreference;
 
 public class ActivityController {
     private Context context;
     private static ActivityController activityController;
     public static final String SEND_ACTIVITY_INTENT = "sendActivityIntent";
     public static final String SEND_INTENT_MOTION = "sendIntentMotion";
+    public static final String OPEN_ACTIVITY = "openActivity";
     public static final String TARGET_INTENT = "targetIntent";
     public static final String PK_NAME = "packageName";
     public static final String TEXT = "TEXT";
 
     private String currentActivityName;
+    private MyActivityHandler myHandler;
     public ActivityController(Context context){
         this.context = context;
+        myHandler = MyActivityHandler.getInstance();
     }
     public static ActivityController getInstance(Context context){
         if(activityController == null){
@@ -23,6 +29,23 @@ public class ActivityController {
         }
         return activityController;
     }
+
+    /**
+     * 仅仅打开目标APP
+     * @param packageName
+     * @param activityName
+     */
+    public void openActivity(String packageName,String activityName){
+        Intent broadIntent = new Intent();
+        broadIntent.putExtra(ActivityController.PK_NAME,packageName);
+        context.sendBroadcast(broadIntent);
+    }
+
+    /**
+     * 打开App并传送要打开页面的Intent
+     * @param packageName
+     * @param intent
+     */
     public void openActivity(String packageName,Intent intent){
         Intent broadIntent = new Intent();
         broadIntent.setAction(ActivityController.SEND_ACTIVITY_INTENT);
@@ -32,20 +55,21 @@ public class ActivityController {
     }
 
     /**
-     *
+     * 给任务队列添加一个任务，任务队列在MyActivityHandler中，将在MonitorActivityReceiver中得到处理
      * @param packageName
-     * @param intent
-     * @param key  为搜索词，用来填入搜索框，并作为key值的一部分获得motionEvent
+     * @param activityName
+     * @param task
      */
-    public void openActivityWithMotionEvent(String packageName,Intent intent,String key){
+    public void addTask(String packageName,String activityName, OpenActivityTask task){
+        task.setContext(context);
+        task.setMyHandler(myHandler);
+        task.setSavePreference(SavePreference.getInstance(context));
+        myHandler.addTask(task);
+
         Intent broadIntent = new Intent();
-        broadIntent.setAction(ActivityController.SEND_INTENT_MOTION);
-        broadIntent.putExtra(ActivityController.TARGET_INTENT,intent);
+        broadIntent.setAction(ActivityController.OPEN_ACTIVITY);
         broadIntent.putExtra(ActivityController.PK_NAME,packageName);
-        broadIntent.putExtra(ActivityController.TEXT,key);
-        Log.i("LZH","打开的Key: "+key);
         context.sendBroadcast(broadIntent);
     }
-
 
 }
