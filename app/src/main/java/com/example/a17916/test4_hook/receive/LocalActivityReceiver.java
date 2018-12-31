@@ -42,6 +42,8 @@ public class LocalActivityReceiver extends BroadcastReceiver {
     public static final String INPUT_EVENT = "INPUT_EVENT";
     public static final String EVENTS = "EVENTS";
 
+    public static final String GenerateIntentData = "GenerateIntentData";
+
     public static final String fromActivityStart ="fromActivityStart";
     public static final String fromActivityPlay = "fromActivityPlay";
     public static final String TARGET_INTENT = "targetIntent";
@@ -77,12 +79,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
                     ArrayList<PageResult> pageResults = analyseViewTree(context);
 
                     Intent openInfo = getShowIntent(pageResults);
-//                    openInfo.putExtra("info",info);
-                    //添加数据
-                    Intent generateDataIntent = testGenerateData(pageResults);
-                    selfActivity.sendBroadcast(generateDataIntent);
-                    //临时注释
-//                    selfActivity.startActivity(openInfo);
+                    selfActivity.startActivity(openInfo);
                     Log.i("LZH","open window");
                 }else{
 //                    Log.i("LZH","not open window "+selfActivityName+"  show "+showActivityName);
@@ -113,16 +110,27 @@ public class LocalActivityReceiver extends BroadcastReceiver {
                 if(startActivityFrom.compareTo(selfActivityName)!=0){
                     break;
                 }
-                Log.i("LZH","输入text");
+
                 inputText(textKey);
                 break;
             case LocalActivityReceiver.INPUT_EVENT:
                 eventBytes = intent.getByteArrayExtra(LocalActivityReceiver.EVENTS);
+                //在指定的页面播放点击事件
                 startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityPlay);
                 if(startActivityFrom.compareTo(selfActivityName)!=0){
                     break;
                 }
                 playMotionEvent(eventBytes);
+                break;
+            case LocalActivityReceiver.GenerateIntentData:
+                if(selfActivityName.equals(showActivityName)){
+                    ArrayList<PageResult> pageResults = analyseViewTree(context);
+                    //添加数据
+                    Intent generateDataIntent = testGenerateData(pageResults);
+                    selfActivity.sendBroadcast(generateDataIntent);
+                }else{
+//                    Log.i("LZH","not open window "+selfActivityName+"  show "+showActivityName);
+                }
                 break;
         }
     }
@@ -134,6 +142,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
         if(editText==null){
             Log.i("LZH","未找到EditText");
         }
+        Log.i("LZH","输入text: "+textKey);
         editText.setText(textKey);
     }
     private EditText findEditText(View view){
@@ -230,7 +239,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
     //用来向数据库中添加数据
     private Intent testGenerateData(ArrayList<PageResult> pageResults){
         Intent addDataIntent = new Intent();
-        addDataIntent.setAction(GenerateDataService.GENERATE_DATA);
+        addDataIntent.setAction(GenerateDataService.GENERATE_INTENT_DATA);
         addDataIntent.putExtra(GenerateDataService.ACTIVITY_NAME,selfActivityName);
         addDataIntent.putParcelableArrayListExtra(GenerateDataService.PAGE_INFO,pageResults);
 
@@ -239,6 +248,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
 
         addDataIntent.putExtra(GenerateDataService.VERSION,version);
         addDataIntent.putExtra(GenerateDataService.APP_NAME,appName);
+        addDataIntent.putExtra(GenerateDataService.PACKAGE_NAME,selfActivity.getPackageName());
 
         return addDataIntent;
     }

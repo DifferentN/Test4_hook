@@ -10,14 +10,21 @@ public class StepContent {
     private Intent sendIntent;
     private String inputText;
     private byte[] eventBytes;
+    private String activityName;//说明这一步要在哪一个Activity执行
+    private String appName;//说明这一步要在哪一个app执行
     private StepCondition stepCondition;
 
     public StepContent(int type, Intent intent, String text, byte[] bytes){
         stepType = type;
         sendIntent = intent;
+        inputText  = text;
         eventBytes = bytes;
     }
-
+    public StepContent(int type, Intent intent, String text, byte[] bytes,String activityName,String appName){
+        this(type,intent,text,bytes);
+        this.activityName = activityName;
+        this.appName = appName;
+    }
     public void setStepCondition(StepCondition stepCondition){
         this.stepCondition = stepCondition;
     }
@@ -40,5 +47,13 @@ public class StepContent {
 
     public StepCondition getStepCondition() {
         return stepCondition;
+    }
+
+    public String getActivityName() {
+        return activityName;
+    }
+
+    public String getAppName() {
+        return appName;
     }
 }

@@ -27,7 +27,8 @@ public class AppDataDao extends AbstractDao<AppData, Long> {
         public final static Property AppId = new Property(0, Long.class, "appId", true, "_id");
         public final static Property AppName = new Property(1, String.class, "appName", false, "APP_NAME");
         public final static Property Version = new Property(2, String.class, "version", false, "VERSION");
-        public final static Property ResId = new Property(3, Long.class, "resId", false, "RES_ID");
+        public final static Property PackageName = new Property(3, String.class, "packageName", false, "PACKAGE_NAME");
+        public final static Property ResId = new Property(4, Long.class, "resId", false, "RES_ID");
     }
 
     private DaoSession daoSession;
@@ -49,7 +50,8 @@ public class AppDataDao extends AbstractDao<AppData, Long> {
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: appId
                 "\"APP_NAME\" TEXT," + // 1: appName
                 "\"VERSION\" TEXT," + // 2: version
-                "\"RES_ID\" INTEGER);"); // 3: resId
+                "\"PACKAGE_NAME\" TEXT," + // 3: packageName
+                "\"RES_ID\" INTEGER);"); // 4: resId
     }
 
     /** Drops the underlying database table. */
@@ -77,9 +79,14 @@ public class AppDataDao extends AbstractDao<AppData, Long> {
             stmt.bindString(3, version);
         }
  
+        String packageName = entity.getPackageName();
+        if (packageName != null) {
+            stmt.bindString(4, packageName);
+        }
+ 
         Long resId = entity.getResId();
         if (resId != null) {
-            stmt.bindLong(4, resId);
+            stmt.bindLong(5, resId);
         }
     }
 
@@ -102,9 +109,14 @@ public class AppDataDao extends AbstractDao<AppData, Long> {
             stmt.bindString(3, version);
         }
  
+        String packageName = entity.getPackageName();
+        if (packageName != null) {
+            stmt.bindString(4, packageName);
+        }
+ 
         Long resId = entity.getResId();
         if (resId != null) {
-            stmt.bindLong(4, resId);
+            stmt.bindLong(5, resId);
         }
     }
 
@@ -125,7 +137,8 @@ public class AppDataDao extends AbstractDao<AppData, Long> {
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // appId
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // appName
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // version
-            cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3) // resId
+            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // packageName
+            cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4) // resId
         );
         return entity;
     }
@@ -135,7 +148,8 @@ public class AppDataDao extends AbstractDao<AppData, Long> {
         entity.setAppId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setAppName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setVersion(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setResId(cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3));
+        entity.setPackageName(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
+        entity.setResId(cursor.isNull(offset + 4) ? null : cursor.getLong(offset + 4));
      }
     
     @Override

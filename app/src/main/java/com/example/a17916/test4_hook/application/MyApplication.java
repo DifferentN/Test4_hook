@@ -21,7 +21,7 @@ public class MyApplication extends Application {
     }
     private void setDataBase(){
         //创建数据库mydb.db
-        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(mApp,"myDB.db");
+        DaoMaster.DevOpenHelper helper = new DaoMaster.DevOpenHelper(mApp,"myDB");
         //获取可写数据库
         SQLiteDatabase database = helper.getWritableDatabase();
         //获取数据库对象

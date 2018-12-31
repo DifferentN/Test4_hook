@@ -67,6 +67,8 @@ public class UnionOpenActivityTask extends OpenActivityTask {
 //            steps.remove(0);
 //        }
 
+        curStep = steps.get(0);
+        curActivityName = curStep.getActivityName();
         executeStep(curStep,operation);
         steps.remove(0);
 
@@ -87,6 +89,9 @@ public class UnionOpenActivityTask extends OpenActivityTask {
 //            executeStep(curStep,operation);
 //            steps.remove(0);
 //        }
+
+        curStep = steps.get(0);
+        curActivityName = curStep.getActivityName();
         executeStep(curStep,operation);
         steps.remove(0);
 
@@ -107,7 +112,8 @@ public class UnionOpenActivityTask extends OpenActivityTask {
 //            executeStep(curStep,operation);
 //            steps.remove(0);
 //        }
-
+        curStep = steps.get(0);
+        curActivityName = curStep.getActivityName();
         executeStep(curStep,operation);
         steps.remove(0);
 
@@ -134,6 +140,12 @@ public class UnionOpenActivityTask extends OpenActivityTask {
                 operation.operationReplayInputEvent(step.getInputText(),curActivityName);
                 break;
             case StepContent.MOTION_EVENT_TYPE:
+                //延时1s保证点击事件的播放
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 operation.operationReplayMotionEvent(step.getEventBytes(),curActivityName);
                 break;
         }

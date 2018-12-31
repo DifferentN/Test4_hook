@@ -20,9 +20,12 @@ public class AppData {
 
     private String version ;
 
+    private String packageName;
+
     private Long resId;
     @ToMany(referencedJoinProperty = "resId")
     private List<ResourceData> resourceDatas;
+
 
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
@@ -33,18 +36,20 @@ public class AppData {
     private transient AppDataDao myDao;
 
 
-    public AppData(Long appId,String appName,String version){
+    public AppData(Long appId,String appName,String version,String packageName){
         this.appId = appId;
         this.appName = appName;
         this.version = version;
+        this.packageName = packageName;
     }
 
 
-    @Generated(hash = 1504355784)
-    public AppData(Long appId, String appName, String version, Long resId) {
+    @Generated(hash = 847495512)
+    public AppData(Long appId, String appName, String version, String packageName, Long resId) {
         this.appId = appId;
         this.appName = appName;
         this.version = version;
+        this.packageName = packageName;
         this.resId = resId;
     }
 
@@ -169,6 +174,16 @@ public class AppData {
     public void __setDaoSession(DaoSession daoSession) {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getAppDataDao() : null;
+    }
+
+
+    public String getPackageName() {
+        return this.packageName;
+    }
+
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
     }
 
 

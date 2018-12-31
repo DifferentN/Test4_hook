@@ -20,15 +20,15 @@ public class ActivityData {
 
     private String activityName;
 
-
     private Long appId;
     @ToOne(joinProperty = "appId")
     private AppData appData;
 
     private Long resId;
     @ToMany(referencedJoinProperty = "resId")
-
     private List<ResourceData> resourceDatas;
+
+
 
     /** Used to resolve relations */
     @Generated(hash = 2040040024)

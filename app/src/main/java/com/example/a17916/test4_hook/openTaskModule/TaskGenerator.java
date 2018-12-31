@@ -27,7 +27,7 @@ public class TaskGenerator {
     //任务模板文件中根节点的页面名称
     public static final String Attribute_ActivityName = "ActivityName";
     //任务模板文件中根节点的资源名称
-    public static final String Attribute_ResName = "ResourceName";
+    public static final String Attribute_ResName = "ResourceType";
 
     public static final String Step = "Step";
     public static final String Attr_Type = "Type";
@@ -50,7 +50,7 @@ public class TaskGenerator {
 
     public UnionOpenActivityTask generatorTask(Long activityId,String resType,String resEntityName,
                                                Long resId){
-        String activityName = QueryManager.getInstance().queryActivityNameById(activityId);
+        String activityName = QueryManager.getInstance().queryActivityNameByActivityId(activityId);
 
         return generatorTask(activityName,resType,resEntityName,resId);
     }
@@ -61,7 +61,7 @@ public class TaskGenerator {
             Log.i("LZH","未能找到任务模板文件");
             return  null;
         }
-        UnionOpenActivityTask task = createTask(file,resId,resType,resEntityName);
+        UnionOpenActivityTask task = createTask(file,resId,resType,resEntityName,activityName);
 
         return task;
     }
@@ -75,7 +75,7 @@ public class TaskGenerator {
     private File findModuleTaskFile(String activityName,String resType){
         String path = Environment.getExternalStorageDirectory().getAbsolutePath();
         //文件放在taskModule文件夹下
-        path+="taskModule";
+        path+="/taskModule";
         File dir = new File(path);
         if(!dir.isDirectory()){
             Log.i("LZH","文件夹不存在： "+path);
@@ -137,7 +137,7 @@ public class TaskGenerator {
      * @param text 资源的名称 可以作为搜索词使用
      * @return 要执行的任务任务
      */
-    private UnionOpenActivityTask createTask(File file,Long resId,String resType,String text){
+    private UnionOpenActivityTask createTask(File file,Long resId,String resType,String text,String activityName){
 
         DocumentBuilder builder = null;
         try {
@@ -168,10 +168,11 @@ public class TaskGenerator {
                 if(type.equals(Type_Intent)){
                     //Intent操作，用资源ID和activity名称确定
                     targetActivityName = element.getAttribute(Attr_TargetActivityName);
-                    createIntentStep(resId,targetActivityName);
+                    createIntentStep(resId,activityName,targetActivityName);
                 }else if(type.equals(Type_Text)){
                     //输入文本操作，只需要 搜索词
-                    createTextStep(text);
+                    targetActivityName = element.getAttribute(Attr_TargetActivityName);
+                    createTextStep(text,targetActivityName);
                 }else if(type.equals(Type_MotionEvent)){
                     //点击事件 用Activity名称，资源类型，事件顺序确定
                     targetActivityName = element.getAttribute(Attr_TargetActivityName);
@@ -188,18 +189,29 @@ public class TaskGenerator {
 
     }
 
-    //查询数据库，构造一步
-    private void createIntentStep(Long resId,String activityName){
+    /**
+     *
+     * @param resId
+     * @param activityName 显示资源的页面
+     * @param fromActivityName 指定step在哪个页面发生，由任务模板指定
+     */
+    private void createIntentStep(Long resId,String activityName,String fromActivityName){
         Intent intent = queryManager.queryIntent(activityName,resId);
-        taskBuilder.addIntentStep(intent);
+        taskBuilder.addIntentStep(intent,fromActivityName);
     }
     //
-    private void createTextStep(String text){
-        taskBuilder.addTextStep(text);
+    private void createTextStep(String text,String activityName){
+        taskBuilder.addTextStep(text,activityName);
     }
-    //
+
+    /**
+     * 回放点击事件中 显示的页面和执行step的页面必须是同一个,所以可以用一个activityName
+     * @param activityName
+     * @param resType
+     * @param seq
+     */
     private void createMotionEventSteo(String activityName,String resType,int seq){
         byte [] bytes = queryManager.queryMotionEvent(activityName,resType,seq);
-        taskBuilder.addMotionEventStep(bytes);
+        taskBuilder.addMotionEventStep(bytes,activityName);
     }
 }

@@ -31,7 +31,7 @@ public class MotionDataDao extends AbstractDao<MotionData, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property ActivityName = new Property(1, String.class, "activityName", false, "ActivityName");
-        public final static Property MotionSeq = new Property(2, int.class, "motionSeq", false, "MOTION_SEQ");
+        public final static Property MotionSeq = new Property(2, Long.class, "motionSeq", false, "MOTION_SEQ");
         public final static Property ActivityId = new Property(3, Long.class, "activityId", false, "ACTIVITY_ID");
         public final static Property ResCategory = new Property(4, String.class, "resCategory", false, "RES_CATEGORY");
         public final static Property ContentKey = new Property(5, String.class, "contentKey", false, "ContentKey");
@@ -56,7 +56,7 @@ public class MotionDataDao extends AbstractDao<MotionData, Long> {
         db.execSQL("CREATE TABLE " + constraint + "\"MOTION_DATA\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
                 "\"ActivityName\" TEXT," + // 1: activityName
-                "\"MOTION_SEQ\" INTEGER NOT NULL ," + // 2: motionSeq
+                "\"MOTION_SEQ\" INTEGER," + // 2: motionSeq
                 "\"ACTIVITY_ID\" INTEGER," + // 3: activityId
                 "\"RES_CATEGORY\" TEXT," + // 4: resCategory
                 "\"ContentKey\" TEXT," + // 5: contentKey
@@ -82,7 +82,11 @@ public class MotionDataDao extends AbstractDao<MotionData, Long> {
         if (activityName != null) {
             stmt.bindString(2, activityName);
         }
-        stmt.bindLong(3, entity.getMotionSeq());
+ 
+        Long motionSeq = entity.getMotionSeq();
+        if (motionSeq != null) {
+            stmt.bindLong(3, motionSeq);
+        }
  
         Long activityId = entity.getActivityId();
         if (activityId != null) {
@@ -118,7 +122,11 @@ public class MotionDataDao extends AbstractDao<MotionData, Long> {
         if (activityName != null) {
             stmt.bindString(2, activityName);
         }
-        stmt.bindLong(3, entity.getMotionSeq());
+ 
+        Long motionSeq = entity.getMotionSeq();
+        if (motionSeq != null) {
+            stmt.bindLong(3, motionSeq);
+        }
  
         Long activityId = entity.getActivityId();
         if (activityId != null) {
@@ -157,7 +165,7 @@ public class MotionDataDao extends AbstractDao<MotionData, Long> {
         MotionData entity = new MotionData( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // activityName
-            cursor.getInt(offset + 2), // motionSeq
+            cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2), // motionSeq
             cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3), // activityId
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // resCategory
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // contentKey
@@ -170,7 +178,7 @@ public class MotionDataDao extends AbstractDao<MotionData, Long> {
     public void readEntity(Cursor cursor, MotionData entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setActivityName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setMotionSeq(cursor.getInt(offset + 2));
+        entity.setMotionSeq(cursor.isNull(offset + 2) ? null : cursor.getLong(offset + 2));
         entity.setActivityId(cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3));
         entity.setResCategory(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setContentKey(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));

@@ -7,7 +7,6 @@ import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.ToOne;
 import org.greenrobot.greendao.DaoException;
 import com.greendao.gen.DaoSession;
-import com.greendao.gen.ResourceDataDao;
 import com.greendao.gen.ActivityDataDao;
 import com.greendao.gen.MotionDataDao;
 
@@ -20,7 +19,7 @@ public class MotionData {
     @Property(nameInDb = "ActivityName")
     private String activityName;
 
-    private int motionSeq;
+    private Long motionSeq;
 
     private Long activityId;
     @ToOne(joinProperty = "activityId")
@@ -48,15 +47,17 @@ public class MotionData {
     @Generated(hash = 1222239601)
     private transient Long activityData__resolvedKey;
 
-
-
-    @Generated(hash = 1146652005)
-    public MotionData() {
+    public MotionData(Long id,String activityName,String resCategory,Long motionSeq,byte[] bytes){
+        this.id = id;
+        this.activityName = activityName;
+        this.resCategory = resCategory;
+        this.motionSeq = motionSeq;
+        this.bytes = bytes;
     }
 
-    @Generated(hash = 548380069)
-    public MotionData(Long id, String activityName, int motionSeq, Long activityId,
-            String resCategory, String contentKey, byte[] bytes) {
+    @Generated(hash = 1955713332)
+    public MotionData(Long id, String activityName, Long motionSeq, Long activityId, String resCategory,
+            String contentKey, byte[] bytes) {
         this.id = id;
         this.activityName = activityName;
         this.motionSeq = motionSeq;
@@ -64,6 +65,10 @@ public class MotionData {
         this.resCategory = resCategory;
         this.contentKey = contentKey;
         this.bytes = bytes;
+    }
+
+    @Generated(hash = 1146652005)
+    public MotionData() {
     }
 
     public Long getId() {
@@ -82,23 +87,13 @@ public class MotionData {
         this.activityName = activityName;
     }
 
-    public String getContentKey() {
-        return this.contentKey;
+    public Long getMotionSeq() {
+        return this.motionSeq;
     }
 
-    public void setContentKey(String contentKey) {
-        this.contentKey = contentKey;
+    public void setMotionSeq(Long motionSeq) {
+        this.motionSeq = motionSeq;
     }
-
-    public byte[] getBytes() {
-        return this.bytes;
-    }
-
-    public void setBytes(byte[] bytes) {
-        this.bytes = bytes;
-    }
-
-
 
     public Long getActivityId() {
         return this.activityId;
@@ -116,12 +111,27 @@ public class MotionData {
         this.resCategory = resCategory;
     }
 
+    public String getContentKey() {
+        return this.contentKey;
+    }
+
+    public void setContentKey(String contentKey) {
+        this.contentKey = contentKey;
+    }
+
+    public byte[] getBytes() {
+        return this.bytes;
+    }
+
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
     /** To-one relationship, resolved on first access. */
     @Generated(hash = 706526624)
     public ActivityData getActivityData() {
         Long __key = this.activityId;
-        if (activityData__resolvedKey == null
-                || !activityData__resolvedKey.equals(__key)) {
+        if (activityData__resolvedKey == null || !activityData__resolvedKey.equals(__key)) {
             final DaoSession daoSession = this.daoSession;
             if (daoSession == null) {
                 throw new DaoException("Entity is detached from DAO context");
@@ -189,14 +199,8 @@ public class MotionData {
         myDao = daoSession != null ? daoSession.getMotionDataDao() : null;
     }
 
-    public int getMotionSeq() {
-        return this.motionSeq;
-    }
-
-    public void setMotionSeq(int motionSeq) {
-        this.motionSeq = motionSeq;
-    }
-
+    
+   
 
 
 

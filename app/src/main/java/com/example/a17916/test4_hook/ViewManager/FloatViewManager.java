@@ -17,17 +17,21 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.example.a17916.test4_hook.R;
+import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 import com.example.a17916.test4_hook.receive.CreateTempleReceiver;
 import com.example.a17916.test4_hook.receive.InputTextReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.view.CreateTempleView;
 import com.example.a17916.test4_hook.view.FloatView;
+import com.example.a17916.test4_hook.view.SaveIntentView;
 import com.example.a17916.test4_hook.view.SaveMotionView;
 
 public class FloatViewManager {
     private FloatView floatView;
     private CreateTempleView createTempleView;
     private SaveMotionView saveMotionView;
+    private SaveIntentView saveIntentView;
+
     private static FloatViewManager floatViewManager;
     private WindowManager.LayoutParams layoutParams;
     private Context context;
@@ -100,9 +104,6 @@ public class FloatViewManager {
             layoutParams.x = 0;
             layoutParams.y = 0;
         }
-
-        //can't work
-//        ((ViewGroup)activity.getWindow().getDecorView()).addView(floatView);
         createTempleView.setLayoutParams(layoutParams);
         windowManager.addView(createTempleView,layoutParams);
 
@@ -113,11 +114,6 @@ public class FloatViewManager {
                 Intent intent = new Intent();
                 intent.setAction(CreateTempleReceiver.CREATE_TEMPLE);
                 context.sendBroadcast(intent);
-
-//                Intent intent = new Intent();
-//                intent.setAction(LocalActivityReceiver.INPUT_TEXT);
-//                context.sendBroadcast(intent);
-
             }
         });
 
@@ -138,9 +134,6 @@ public class FloatViewManager {
             layoutParams.x = 0;
             layoutParams.y = 0;
         }
-
-        //can't work
-//        ((ViewGroup)activity.getWindow().getDecorView()).addView(floatView);
         saveMotionView.setLayoutParams(layoutParams);
         windowManager.addView(saveMotionView,layoutParams);
 
@@ -149,11 +142,40 @@ public class FloatViewManager {
             public void onClick(View v) {
                 Log.i("LZH","click createBt");
                 Intent intent = new Intent();
-                intent.setAction(CreateTempleReceiver.CREATE_TEMPLE);
+                intent.setAction(MonitorActivityService.OVERTURN_SAVE);
                 context.sendBroadcast(intent);
 
             }
         });
+    }
 
+    public void showSaveIntentViewBt(){
+        windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        saveIntentView = new SaveIntentView(context);
+        if(layoutParams == null){
+            layoutParams = new WindowManager.LayoutParams();
+            layoutParams.width = saveIntentView.width;
+            layoutParams.height = saveIntentView.height;
+            layoutParams.gravity = Gravity.BOTTOM|Gravity.LEFT;
+            layoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
+            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            layoutParams.format = PixelFormat.RGBA_8888;
+
+            layoutParams.x = 0;
+            layoutParams.y = 0;
+        }
+        saveIntentView.setLayoutParams(layoutParams);
+        windowManager.addView(saveIntentView,layoutParams);
+
+        saveIntentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("LZH","click createBt");
+                Intent intent = new Intent();
+                intent.setAction(LocalActivityReceiver.GenerateIntentData);
+                context.sendBroadcast(intent);
+
+            }
+        });
     }
 }

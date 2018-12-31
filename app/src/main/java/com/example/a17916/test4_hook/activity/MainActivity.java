@@ -16,11 +16,11 @@ import com.example.a17916.test4_hook.database.AppData;
 import com.example.a17916.test4_hook.database.QueryManager;
 import com.example.a17916.test4_hook.manageActivity.ActivityController;
 import com.example.a17916.test4_hook.manageActivity.ControllerService;
-import com.example.a17916.test4_hook.matchModule.taskModule.TaoPiaoPiao.TestTPP;
-import com.example.a17916.test4_hook.matchModule.taskModule.TaskFactory;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 import com.example.a17916.test4_hook.monitorService.MyActivityHandler;
 import com.example.a17916.test4_hook.monitorService.OpenActivityTask;
+import com.example.a17916.test4_hook.openTaskModule.TaskGenerator;
+import com.example.a17916.test4_hook.openTaskModule.UnionOpenActivityTask;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
 import com.greendao.gen.AppDataDao;
@@ -52,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
         floatViewManager.showCreateTempleBt();
     }
 
+    public void saveMotionEvent(View view){
+        FloatViewManager floatViewManager = FloatViewManager.getInstance(this);
+        floatViewManager.showSaveMotionViewBt();
+    }
+    public void saveIntent(View view){
+        FloatViewManager floatViewManager = FloatViewManager.getInstance(this);
+        floatViewManager.showSaveIntentViewBt();
+    }
     private void StartSendDataService(){
         Intent intent = new Intent(this,ControllerService.class);
         startService(intent);
@@ -76,14 +84,11 @@ public class MainActivity extends AppCompatActivity {
 //        task.setMyHandler(MyActivityHandler.getInstance());
 //        controller.addTask("com.douban.movie","com.douban.frodo.subject.activity.LegacySubjectActivity",task);
 
-        QueryManager queryManager = QueryManager.getInstance();
-        List<Intent> intents = queryManager.queryIntents("云南虫谷");
+        TaskGenerator taskGenerator = new TaskGenerator(this.getApplicationContext());
 
-        if(intents.size()<1){
-            Log.i("LZH","查询不到数据");
-        }else{
-            Log.i("LZH","查询到的Intent的数量: "+intents.size());
-        }
+        UnionOpenActivityTask task = taskGenerator.generatorTask("com.yongche.android.YDBiz.Order.HomePage.MainActivity","UseCar","房山",0l);
+        ActivityController controller = ActivityController.getInstance(getApplicationContext());
+        controller.addTask("com.yongche.android","",task);
 
     }
     public void openCreateIntent(){

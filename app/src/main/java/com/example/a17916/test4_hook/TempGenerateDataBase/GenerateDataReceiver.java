@@ -28,6 +28,7 @@ public class GenerateDataReceiver extends BroadcastReceiver {
     private List<PageResult> resultList;
     private String appName;
     private String version;
+    private String packageName;
 
     private Intent curIntent;
 
@@ -45,7 +46,7 @@ public class GenerateDataReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
         switch (action){
-            case GenerateDataService.GENERATE_DATA:
+            case GenerateDataService.GENERATE_INTENT_DATA:
                 generateData(intent);
                 break;
             case GenerateDataService.SAVE_INTENT:
@@ -61,6 +62,8 @@ public class GenerateDataReceiver extends BroadcastReceiver {
         resultList = intent.getParcelableArrayListExtra(GenerateDataService.PAGE_INFO);
         appName = intent.getStringExtra(GenerateDataService.APP_NAME);
         version = intent.getStringExtra(GenerateDataService.VERSION);
+        packageName = intent.getStringExtra(GenerateDataService.PACKAGE_NAME);
+
         switch (activityName){
             case taoPiaoPiaoFlimActivity:
                 addTaoPiaoPiaoFlimInfo();
@@ -69,7 +72,7 @@ public class GenerateDataReceiver extends BroadcastReceiver {
     }
 
     private void addTaoPiaoPiaoFlimInfo(){
-        AppData appData = addAppData(appName,version);
+        AppData appData = addAppData(appName,version,packageName);
 
         ResourceData resData = null;
         for(PageResult pageResult:resultList){
@@ -101,12 +104,13 @@ public class GenerateDataReceiver extends BroadcastReceiver {
      * @param version
      * @return
      */
-    private AppData addAppData(String appName, String version){
+    private AppData addAppData(String appName, String version,String pkName){
         AppData appData = null;
         AppDataDao appDataDao = mDaoSession.getAppDataDao();
         QueryBuilder queryBuilder = appDataDao.queryBuilder();
         queryBuilder.where(AppDataDao.Properties.AppName.eq(appName),
-                AppDataDao.Properties.Version.eq(version));
+                AppDataDao.Properties.Version.eq(version),
+                AppDataDao.Properties.PackageName.eq(pkName));
 
         List<AppData> apps = queryBuilder.list();
         if(apps.size()>=1){
@@ -120,7 +124,7 @@ public class GenerateDataReceiver extends BroadcastReceiver {
         }else{
             //没有APP，添加APP
             long id = appDataDao.count()+1;
-            appData = new AppData(id,appName,version);
+            appData = new AppData(id,appName,version,pkName);
             appDataDao.insert(appData);
         }
 
@@ -200,10 +204,11 @@ public class GenerateDataReceiver extends BroadcastReceiver {
             //检查是否此页面是否可已含有此资源
             boolean hasResData= false;
             for(ResourceData resData:resDatas){
-                if(resData.getResId().compareTo(resId)==0){
+                if(resData.getResId().equals(resId)){
                     hasResData = true;
                 }
             }
+            Log.i("LZH","是否添加数据"+hasResData);
             //此页面未含有此资源，添加此资源
             if(!hasResData){
                 resDatas.add(resourceData);

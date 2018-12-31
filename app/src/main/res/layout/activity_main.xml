@@ -17,8 +17,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="打开豆瓣电影"
-        android:onClick="openDBMovie"/>
+        android:text="保存Intent"
+        android:textAllCaps="false"
+        android:onClick="saveIntent"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,7 +34,14 @@
         android:textAllCaps="false"
         android:text="创建模板"
         android:onClick="createTempleBt">
-
+    </Button>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textAllCaps="false"
+        android:text="保存点击事件"
+        android:onClick="saveMotionEvent">
     </Button>
 
 </LinearLayout>

@@ -97,6 +97,7 @@ public class ActivityOnCreateHook extends XC_MethodHook {
         filter.addAction(LocalActivityReceiver.openTargetActivityByIntentInfo);
         filter.addAction(LocalActivityReceiver.INPUT_TEXT);
         filter.addAction(LocalActivityReceiver.INPUT_EVENT);
+        filter.addAction(LocalActivityReceiver.GenerateIntentData);
         XposedHelpers.setAdditionalInstanceField(activity, "iasReceiver", receiver);
         activity.registerReceiver(receiver,filter);
 //        Log.i("LZH","register activity: "+componentName.getClassName());

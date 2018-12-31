@@ -29,6 +29,7 @@ public class MonitorActivityService extends Service{
     public static final String EVENT_ACTIVITY = "event_activity";
     public static final String SAVE_EDIT_TEXT = "save_edit_text";
     public static final String EDIT_TEXT = "EDIT_TEXT";
+    public static final String OVERTURN_SAVE = "OVERTURN_SAVE";
 
     public static final String ON_CREATE_STATE = "onCreateActivity";
     public static final String ON_RESUME_STATE = "onResumeActivity";
@@ -95,6 +96,7 @@ public class MonitorActivityService extends Service{
         intentFilter1.addAction(MonitorActivityService.EDIT_TEXT);
         intentFilter1.addAction(MonitorActivityService.ON_CREATE_STATE);
         intentFilter1.addAction(MonitorActivityService.ON_RESUME_STATE);
+        intentFilter1.addAction(MonitorActivityService.OVERTURN_SAVE);
         registerReceiver(saveMotionRecevier,intentFilter1);
     }
 

@@ -71,5 +71,17 @@ public class ActivityController {
         broadIntent.putExtra(ActivityController.PK_NAME,packageName);
         context.sendBroadcast(broadIntent);
     }
+    public void addTask(String packageName, OpenActivityTask task){
+        task.setContext(context);
+        task.setMyHandler(myHandler);
+        task.setSavePreference(SavePreference.getInstance(context));
+        myHandler.addTask(task);
+
+        Intent broadIntent = new Intent();
+        broadIntent.setAction(ActivityController.OPEN_ACTIVITY);
+        broadIntent.putExtra(ActivityController.PK_NAME,packageName);
+        context.sendBroadcast(broadIntent);
+    }
+
 
 }

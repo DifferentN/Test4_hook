@@ -52,7 +52,7 @@ public class ShowIntentAdapter extends RecyclerView.Adapter<ShowIntentAdapter.My
             contentView.setOnClickListener(this);
         }
         public void setItem(ShowItem item){
-            textView.setText("在"+item.getAppName()+"中搜索"+item.getNodeValue());
+            textView.setText("在"+item.getAppName()+"中搜索"+item.getResEntityName());
         }
 
         @Override
