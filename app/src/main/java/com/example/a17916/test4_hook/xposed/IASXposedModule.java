@@ -50,7 +50,11 @@ public class IASXposedModule implements IXposedHookLoadPackage {
         XposedHelpers.findAndHookMethod("android.app.Activity",loadPackageParam.classLoader,"dispatchTouchEvent",MotionEvent.class,new ActivityDispatchTouchEventHook());
         XposedHelpers.findAndHookMethod("android.view.View",loadPackageParam.classLoader,"onTouchEvent",MotionEvent.class,new ViewOnTouchEventHook());
 
+        //广播是否在搜索框中输入了数据
+        XposedHelpers.findAndHookMethod("android.widget.TextView",loadPackageParam.classLoader,"setText",CharSequence.class,new EditTextSetTextHook());
+
         //广播告知当前页面是否已经完成绘制
+
         XposedHelpers.findAndHookMethod("android.view.View",loadPackageParam.classLoader,"onDraw",Canvas.class,new EditTextonDrawHook());
 
 //        XposedHelpers.findAndHookMethod("android.support.v7.widget.RecyclerView",loadPackageParam.classLoader,"onTouchEvent",MotionEvent.class,new RecyclerViewOnTouchEventHook());

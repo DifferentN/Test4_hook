@@ -13,9 +13,20 @@ import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 
+import java.util.HashMap;
+
 import de.robv.android.xposed.XC_MethodHook;
 
 public class ActivityOnResumeHook extends XC_MethodHook {
+
+    private long curTime = 0,preTime = 0;
+    private HashMap<String ,Long> onResumeHash;
+
+    public ActivityOnResumeHook() {
+        super();
+        onResumeHash = new HashMap<>();
+    }
+
     @Override
     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
 //        super.beforeHookedMethod(param);
@@ -50,12 +61,12 @@ public class ActivityOnResumeHook extends XC_MethodHook {
 
         //测试中，保存打开应用的Intent
 
-
         Intent saveIntent = new Intent();
         saveIntent.setAction(GenerateDataService.SAVE_INTENT);
         saveIntent.putExtra(GenerateDataService.NEED_SAVE_INTENT,activity.getIntent());
         saveIntent.putExtra(GenerateDataService.ACTIVITY_NAME,activity.getComponentName().getClassName());
         activity.sendBroadcast(saveIntent);
+
 
     }
 }

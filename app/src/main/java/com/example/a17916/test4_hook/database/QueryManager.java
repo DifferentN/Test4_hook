@@ -1,25 +1,23 @@
 package com.example.a17916.test4_hook.database;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Base64;
 import android.util.Log;
 
 import com.example.a17916.test4_hook.application.MyApplication;
 import com.example.a17916.test4_hook.util.normal.ParcelableUtil;
-import com.greendao.gen.ActivityDataDao;
-import com.greendao.gen.AppDataDao;
-import com.greendao.gen.DaoSession;
-import com.greendao.gen.IntentDataDao;
-import com.greendao.gen.MotionDataDao;
-import com.greendao.gen.ResourceDataDao;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class QueryManager {
     private static QueryManager queryData;
-    private DaoSession mDaoSession;
+    private SQLiteDatabase database;
     public static QueryManager getInstance(){
         if(queryData == null){
             queryData = new QueryManager();
@@ -28,26 +26,26 @@ public class QueryManager {
     }
     public QueryManager(){
         MyApplication myApplication = MyApplication.getInstance();
-        mDaoSession = myApplication.getDaoSession();
+        database = myApplication.getSqLiteDatabase();
 
     }
 
     public List<Intent> queryIntents(String resEntityName){
-        List<Long> resIds = queryResByName(resEntityName);
-        List<Long[]> resActIds = new ArrayList<>();
-        List<Long> activityIds = null;
+        List<Integer> resIds = queryResByName(resEntityName);
+        List<Integer[]> resActIds = new ArrayList<>();
+        List<Integer> activityIds = null;
         //搜索含有该资源的页面
-        for(Long resId:resIds){
+        for(Integer resId:resIds){
             activityIds = queryActivityIdByResId(resId);
-            for(Long activityId:activityIds){
-                resActIds.add(new Long[]{activityId,resId});
+            for(Integer activityId:activityIds){
+                resActIds.add(new Integer[]{activityId,resId});
             }
         }
 
 
         List<Intent> queryResult = new ArrayList<>();
         //根据以上信息得到可以显示该资源的Intent
-        for(Long [] result:resActIds){
+        for(Integer [] result:resActIds){
             queryResult.add(queryIntent(result[0],result[1]));
         }
         return queryResult;
@@ -58,17 +56,16 @@ public class QueryManager {
      * @param resEntityName 资源实体名称
      * @return 资源的Id
      */
-    private List<Long> queryResByName(String resEntityName){
-        ResourceDataDao resourceDataDao = mDaoSession.getResourceDataDao();
-        QueryBuilder queryBuilder = resourceDataDao.queryBuilder();
-        //根据资源实体名称chaxun
-        queryBuilder.where(ResourceDataDao.Properties.ResEntityName.eq(resEntityName));
+    private List<Integer> queryResByName(String resEntityName){
+        Cursor cursor = database.query(ResourceData.ResourceTable,null,
+                ResourceData.ResEntityName+"=?",new String[]{resEntityName},
+                null,null,null);
 
-        ArrayList<Long> queryResult = new ArrayList<>();
-        List<ResourceData> resourceDatas = queryBuilder.list();
-        for(ResourceData resourceData:resourceDatas){
-            queryResult.add(resourceData.getResId());
+        ArrayList<Integer> queryResult = new ArrayList<>();
+        while(cursor.moveToNext()){
+            queryResult.add(cursor.getInt(cursor.getColumnIndex(ResourceData.ResId)));
         }
+        cursor.close();
         return queryResult;
     }
 
@@ -79,16 +76,20 @@ public class QueryManager {
      */
     public List<ResourceData> queryResDataByName(String resEntityName){
 //        Log.i("LZH","资源名称: "+resEntityName);
-        ResourceDataDao resourceDataDao = mDaoSession.getResourceDataDao();
-        QueryBuilder queryBuilder = resourceDataDao.queryBuilder();
-        //根据资源实体名称chaxun
-        queryBuilder.where(ResourceDataDao.Properties.ResEntityName.eq(resEntityName));
-        List<ResourceData> resourceDatas = queryBuilder.list();
-//        resourceDatas = resourceDataDao.loadAll();
-//        Log.i("LZH","res size: "+resourceDatas.size());
-//        for(ResourceData resourceData:resourceDatas){
-////            Log.i("LZH","资源类型: "+resourceData.getResCategory()+" 资源名称: "+resourceData.getResEntityName());
-////        }
+        Cursor cursor = database.query(ResourceData.ResourceTable,null,
+                ResourceData.ResEntityName+"=?",new String[]{resEntityName},
+                null,null,null);
+
+        List<ResourceData> resourceDatas = new ArrayList<>();
+        ResourceData resourceData;
+        while (cursor.moveToNext()){
+            resourceData = new ResourceData(cursor.getInt(cursor.getColumnIndex(ResourceData.ResId)),
+                    cursor.getInt(cursor.getColumnIndex(ResourceData.AppId)),
+                    cursor.getString(cursor.getColumnIndex(ResourceData.ResCategory)),
+                    cursor.getString(cursor.getColumnIndex(ResourceData.ResEntityName)));
+            resourceDatas.add(resourceData);
+        }
+        cursor.close();
         return  resourceDatas;
     }
 
@@ -97,23 +98,15 @@ public class QueryManager {
      * @param resId
      * @return 查找到的可以显示该资源的一系列页面的Id
      */
-    private List<Long> queryActivityIdByResId(Long resId){
-        ArrayList<Long> queryResult = new ArrayList<>();
-
-        ActivityDataDao activityDataDao = mDaoSession.getActivityDataDao();
-
-        List<ActivityData> list = activityDataDao.loadAll();
-        List<ResourceData> resDatas = null;
-        for(ActivityData activityData:list){
-            resDatas = activityData.getResourceDatas();
-            for(ResourceData resourceData:resDatas){
-                if(resourceData.getResId().equals(resId)){
-                    queryResult.add(activityData.getActivityId());
-                    break;
-                }
-            }
+    private List<Integer> queryActivityIdByResId(Integer resId){
+        ArrayList<Integer> queryResult = new ArrayList<>();
+        Cursor cursor = database.query(ActivityData.tableName,null,
+                ActivityData.ResId+"=?",new String[]{resId+""},
+                null,null,null);
+        while (cursor.moveToNext()){
+            queryResult.add(cursor.getInt(cursor.getColumnIndex(ActivityData.ActivityId)));
         }
-
+        cursor.close();
         return queryResult;
     }
 
@@ -123,98 +116,98 @@ public class QueryManager {
      * @param resId
      * @return
      */
-    public Intent queryIntent(Long activityId,Long resId){
+    public Intent queryIntent(int activityId,int resId){
         IntentData intentData;
         Intent intent = null;
-
-        IntentDataDao intentDataDao = mDaoSession.getIntentDataDao();
-        QueryBuilder queryBuilder = intentDataDao.queryBuilder();
-        //通过ActivityId查询Intent
-        queryBuilder.where(IntentDataDao.Properties.ActivityId.eq(activityId),
-                IntentDataDao.Properties.ResId.eq(resId));
-
-        List<IntentData> resIntents = queryBuilder.list();
-
-        if(resIntents.size()>=1){
-            int size = resIntents.size();
-            //移除重复的Intent
-            for(int i=0;i<size-1;i++){
-                resIntents.remove(1);
+        Cursor cursor = database.query(IntentData.IntentTable,null,
+                IntentData.ActivityId+"=? and "+IntentData.ResId+"=?",
+                new String[]{activityId+"",resId+""},
+                null,null,null);
+        while (cursor.moveToNext()){
+            String intentStr = cursor.getString(cursor.getColumnIndex(IntentData.IntentByte));
+            if(intentStr == null){
+                Log.i("LZH","获得intent字段为null");
+                return null;
             }
-
-            //无法转化为Intent 且不能保存数据
-            if(resIntents.get(0).getBytes() ==null){
-                Log.i("LZH","byte is null");
-            }
-
-            intent = ParcelableUtil.byte2Intent(resIntents.get(0).getBytes());
-            if(intent==null){
-                Log.i("LZH","can't 2 intent");
-            }
-        }else if(resIntents.size()<1){
-            Log.i("LZH","无法查询到Intent");
+            byte[] intentBytes =  Base64.decode(intentStr,0);
+            intent = ParcelableUtil.byte2Intent(intentBytes);
+            break;
         }
+        cursor.close();
         return intent;
     }
 
-    public Intent queryIntent(String activityName,Long resId){
+    /**
+     * 根据页面名和资源Id查寻Intent
+     * @param activityName
+     * @param resId
+     * @return 到达某个资源页面的Intent
+     */
+    public Intent queryIntent(String activityName,int resId){
         Log.i("LZH","aN: "+activityName+" resId: "+resId);
-        ActivityDataDao activityDataDao = mDaoSession.getActivityDataDao();
-        QueryBuilder queryBuilder = activityDataDao.queryBuilder();
-        queryBuilder.where(ActivityDataDao.Properties.ActivityName.eq(activityName));
-        List<ActivityData> activityDatas = queryBuilder.list();//name与data一一对应，只能查到一个ActivityData
-        ActivityData activityData = null;
+        Cursor cursor = database.query(ActivityData.tableName,null,
+                ActivityData.ActivityName+"=?",
+                new String[]{activityName},
+                null,null,null);
+        int tempResId = -1,targetActivityId = -1;
 
-        List<ResourceData> resourceDatas = null;
-        boolean finded = false;
-        for(ActivityData tempData:activityDatas){
-            resourceDatas = tempData.getResourceDatas();
-            for(ResourceData resourceData:resourceDatas){
-                Log.i("LZH","resID: "+resourceData.getResId());
-                if(resourceData.getResId().equals(resId)){
-                    finded = true;
-                    activityData = tempData;
-                    break;
-                }
-            }
-            if(finded){
+        while (cursor.moveToNext()){
+            tempResId = cursor.getInt(cursor.getColumnIndex(ActivityData.ResId));
+            if(tempResId == resId){
+                targetActivityId = cursor.getInt(cursor.getColumnIndex(ActivityData.ActivityId));
                 break;
             }
         }
-        return queryIntent(activityData.getActivityId(),resId);
+        cursor.close();
+
+        return queryIntent(targetActivityId,resId);
     }
+
+    /**
+     * 查找指定页面，指定次序的，播放指定资源的MotionEvent
+     * @param activityName
+     * @param resType
+     * @param motionSeq
+     * @return
+     */
     public byte[] queryMotionEvent(String activityName,String resType,int motionSeq){
-        MotionData motionData = null;
         byte[] eventBytes = null;
-//
-        MotionDataDao motionDataDao = mDaoSession.getMotionDataDao();
-        QueryBuilder queryBuilder = motionDataDao.queryBuilder();
-        queryBuilder.where(MotionDataDao.Properties.ActivityName.eq(activityName),
-                MotionDataDao.Properties.ResCategory.eq(resType),
-                MotionDataDao.Properties.MotionSeq.eq(motionSeq));
-
-        List<MotionData> motionDatas = queryBuilder.list();
-
-        motionDatas = queryBuilder.list();
-        int size = motionDatas.size();
-        if(size<1){
-            Log.i("LZH","未查询到对应的点击事件");
-        }else if(size>1){
-            Log.i("LZH","查询到的点击事件重复");
+        Cursor cursor = database.query(MotionData.MotionTable,null,
+                MotionData.ActivityName+"=? and "+MotionData.ResType+"=? and "+MotionData.MotionSeq+"=?",
+                new String[]{activityName,resType,motionSeq+""},
+                null,null,null);
+        if(cursor.moveToNext()){
+            String motionStr = cursor.getString(cursor.getColumnIndex(MotionData.MotionByte));
+            if(motionStr==null){
+                Log.i("LZH","查询到的Motion字段为null");
+            }
+            eventBytes = Base64.decode(motionStr,0);
         }else{
-            motionData = motionDatas.get(0);
-            eventBytes = motionData.getBytes();
+            Log.i("LZH","未查询到对应的点击事件");
         }
+        cursor.close();
         return eventBytes;
     }
 
-    public String queryActivityNameByActivityId(Long activityId){
-        ActivityDataDao activityDataDao = mDaoSession.getActivityDataDao();
-        QueryBuilder queryBuilder = activityDataDao.queryBuilder();
-        queryBuilder.where(ActivityDataDao.Properties.ActivityId.eq(activityId));
-        List<ActivityData> activityDatas = queryBuilder.list();
+    /**
+     * 通过ActivityId查询activityName
+     * @param activityId
+     * @return
+     */
+    public String queryActivityNameByActivityId(int activityId){
+        Cursor cursor = database.query(ActivityData.tableName,null,
+                ActivityData.ActivityId+"=?",
+                new String[]{activityId+""},
+                null,null,null);
+        String activityName = null;
+        if(cursor.moveToNext()){
+            activityName = cursor.getString(cursor.getColumnIndex(ActivityData.ActivityName));
+        }else{
+            Log.i("LZH","出错，为查询到ActivityName");
+        }
+        cursor.close();
 
-        return activityDatas.get(0).getActivityName();
+        return activityName;
     }
 
     /**
@@ -222,41 +215,158 @@ public class QueryManager {
      * @param appId
      * @return
      */
-    public AppData queryAppDataByAppId(Long appId){
-        AppDataDao appDataDao = mDaoSession.getAppDataDao();
-        QueryBuilder queryBuilder = appDataDao.queryBuilder();
-        queryBuilder.where(AppDataDao.Properties.AppId.eq(appId));
-        List<AppData> appDatas = queryBuilder.list();
+    public AppData queryAppDataByAppId(int appId){
+        AppData appData = null;
+        Cursor cursor = database.query(AppData.tableName,null,
+                AppData.AppId+"=?",
+                new String[]{appId+""},
+                null,null,null);
+        if(cursor.moveToNext()){
+            appData = new AppData(cursor.getInt(cursor.getColumnIndex(AppData.AppId)),
+                    cursor.getString(cursor.getColumnIndex(AppData.AppName)),
+                    cursor.getString(cursor.getColumnIndex(AppData.Version)),
+                    cursor.getString(cursor.getColumnIndex(AppData.PackageName)));
+        }
+        cursor.close();
         //一个AppID对应一个AppData
-        return appDatas.get(0);
+        return appData;
     }
 
     /**
-     * 通过ResId查询ActivityData
+     * 查找含有该页面的App
+     * @param activityName
+     * @return
+     */
+    public AppData queryAppDataByActivityName(String activityName){
+        AppData appData = null;
+        Cursor cursor = database.query(ActivityData.tableName,null,
+                ActivityData.ActivityName+"=?",
+                new String[]{activityName},
+                null,null,null);
+        int appId = -1;
+        if(cursor.moveToNext()){
+            appId = cursor.getInt(cursor.getColumnIndex(ActivityData.AppId));
+            appData = queryAppDataByAppId(appId);
+        }else {
+            Log.i("LZH","出错：数据库中未保存此页面");
+        }
+        cursor.close();
+
+        return appData;
+    }
+
+    /**
+     * 通过ResId查询ActivityData(查询某个指定Id资源的页面)
      * 一个resId对应一个ActivityData
      * @param resId
      * @return
      */
-    public ActivityData queryActivityDataByResId(Long resId){
+    public ActivityData queryActivityDataByResId(int resId){
         Log.i("LZH","resId: "+resId);
-        ActivityDataDao activityDataDao = mDaoSession.getActivityDataDao();
+        ActivityData activityData = null;
+        AppData appData = null;
+        Cursor cursor = database.query(ActivityData.tableName,null,
+                ActivityData.ResId+"=?",
+                new String[]{resId+""},
+                null,null,null);
 
-        List<ActivityData> activityDatas = activityDataDao.loadAll();
-        List<ResourceData> resourceDatas = null;
-        for(ActivityData activityData:activityDatas){
-            resourceDatas = activityData.getResourceDatas();
-            for(ResourceData resourceData:resourceDatas){
-                if(resourceData.getResId().equals(resId)){
-                    return activityData;
-                }
+        if(cursor.moveToNext()){
+            appData = queryAppDataByAppId(cursor.getInt(cursor.getColumnIndex(ActivityData.AppId)));
+            activityData = new ActivityData(cursor.getInt(cursor.getColumnIndex(ActivityData.ActivityId)),
+                    cursor.getString(cursor.getColumnIndex(ActivityData.ActivityName)),
+                    cursor.getInt(cursor.getColumnIndex(ActivityData.AppId)),
+                    appData,resId);
+        }else{
+            Log.i("LZH","通过资源Id查询页面失败");
+        }
+        cursor.close();
+
+        return activityData;
+    }
+
+    /**
+     * 返回所有的AppData
+     * @return
+     */
+    public List<AppData> queryAllAppData(){
+        List<AppData> list = new ArrayList<>();
+        AppData appData = null;
+        Cursor cursor = database.query(AppData.tableName,null, null, null,
+                null,null,null);
+        while (cursor.moveToNext()){
+            appData = new AppData(cursor.getInt(cursor.getColumnIndex(AppData.AppId)),
+                    cursor.getString(cursor.getColumnIndex(AppData.AppName)),
+                    cursor.getString(cursor.getColumnIndex(AppData.Version)),
+                    cursor.getString(cursor.getColumnIndex(AppData.PackageName)));
+            list.add(appData);
+        }
+        cursor.close();
+
+        return list;
+    }
+
+    /**
+     * 通过AppId 来查询此App中的搜索资源，只有一个
+     * @param appId
+     * @return
+     */
+    public ResourceData querySearchResDataByAppId(int appId){
+        ResourceData resourceData = null;
+        Cursor cursor = database.query(ResourceData.ResourceTable,null,
+                ResourceData.AppId+"=? and "+ResourceData.ResCategory+" =? ",
+                new String[]{appId+"","搜索"},
+                null,null,null);
+        if(cursor.moveToNext()){
+            resourceData = new ResourceData(cursor.getInt(cursor.getColumnIndex(ResourceData.ResId)),
+                    cursor.getInt(cursor.getColumnIndex(ResourceData.AppId)),
+                    cursor.getString(cursor.getColumnIndex(ResourceData.ResCategory)),
+                    cursor.getString(cursor.getColumnIndex(ResourceData.ResEntityName)));
+        }else{
+            Log.i("LZH","没有查找到："+appId+" 对应的搜索资源 ");
+        }
+        cursor.close();
+
+        return resourceData;
+    }
+
+    /**
+     * 通过AppId,查询一个App中的所有资源
+     * @param appId
+     * @return
+     */
+    public List<ResourceData> queryResDataByAppId(int appId){
+        List<ResourceData> resourceDatas = new ArrayList<>();
+        ResourceData resourceData = null;
+        Cursor cursor = database.query(ResourceData.ResourceTable,null,
+                ResourceData.AppId+"=?",
+                new String[]{appId+""},
+                null,null,null);
+        while (cursor.moveToNext()){
+            resourceData = new ResourceData(cursor.getInt(cursor.getColumnIndex(ResourceData.ResId)),
+                    cursor.getInt(cursor.getColumnIndex(ResourceData.AppId)),
+                    cursor.getString(cursor.getColumnIndex(ResourceData.ResCategory)),
+                    cursor.getString(cursor.getColumnIndex(ResourceData.ResEntityName)));
+            resourceDatas.add(resourceData);
+        }
+        cursor.close();
+        return resourceDatas;
+    }
+
+    /**
+     * 查看一个App是否有这种资源类型
+     * @param appId
+     * @param resType
+     * @return
+     */
+    public boolean checkAppContainResType(int appId,String resType){
+
+        List<ResourceData> resourceDatas = queryResDataByAppId(appId);
+        for(ResourceData resourceData:resourceDatas){
+            if(resourceData.getResCategory().equals(resType)){
+                return true;
             }
         }
 
-        if(activityDatas==null||activityDatas.size()<1){
-            Log.i("LZH","通过资源Id查询页面失败");
-            return null;
-        }
-        return activityDatas.get(0);
+        return false;
     }
-
 }

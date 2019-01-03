@@ -10,24 +10,15 @@ import android.view.View;
 
 import com.example.a17916.test4_hook.R;
 import com.example.a17916.test4_hook.TempGenerateDataBase.GenerateDataService;
+import com.example.a17916.test4_hook.TempGenerateDataBase.TestShowDataBase;
 import com.example.a17916.test4_hook.ViewManager.FloatViewManager;
-import com.example.a17916.test4_hook.application.MyApplication;
-import com.example.a17916.test4_hook.database.AppData;
-import com.example.a17916.test4_hook.database.QueryManager;
 import com.example.a17916.test4_hook.manageActivity.ActivityController;
 import com.example.a17916.test4_hook.manageActivity.ControllerService;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
-import com.example.a17916.test4_hook.monitorService.MyActivityHandler;
-import com.example.a17916.test4_hook.monitorService.OpenActivityTask;
 import com.example.a17916.test4_hook.openTaskModule.TaskGenerator;
 import com.example.a17916.test4_hook.openTaskModule.UnionOpenActivityTask;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
-import com.greendao.gen.AppDataDao;
-
-import org.greenrobot.greendao.query.QueryBuilder;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
         StartSendDataService();
         startSaveData();
 
+        TestShowDataBase testShowDataBase = TestShowDataBase.getInstance();
+        testShowDataBase.showData();
     }
 
     public void startFloatBt(View view){
@@ -86,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         TaskGenerator taskGenerator = new TaskGenerator(this.getApplicationContext());
 
-        UnionOpenActivityTask task = taskGenerator.generatorTask("com.yongche.android.YDBiz.Order.HomePage.MainActivity","UseCar","房山",0l);
+        UnionOpenActivityTask task = taskGenerator.generatorTask("com.yongche.android.YDBiz.Order.HomePage.MainActivity","UseCar","房山",0);
         ActivityController controller = ActivityController.getInstance(getApplicationContext());
         controller.addTask("com.yongche.android","",task);
 

@@ -3,14 +3,14 @@ package com.example.a17916.test4_hook.activity.showResult;
 import android.content.Intent;
 
 public class ShowItem {
-    private Long resourceId;
+    private int resourceId;
     private String resourceType;
     private String resEntityName;//资源实体名称
     private String appName;
     private String pkName;
     private String activityName;
 
-    public ShowItem(Long resourceId,String resourceType,String resEntityName,String appName,String pkName, String activityName){
+    public ShowItem(int resourceId,String resourceType,String resEntityName,String appName,String pkName, String activityName){
         this.resourceId = resourceId;
         this.resourceType = resourceType;
         this.resEntityName = resEntityName;
@@ -44,7 +44,7 @@ public class ShowItem {
         return appName;
     }
 
-    public Long getResourceId() {
+    public int getResourceId() {
         return resourceId;
     }
 
@@ -56,7 +56,7 @@ public class ShowItem {
         this.resEntityName = resEntityName;
     }
 
-    public void setResourceId(Long resourceId) {
+    public void setResourceId(int resourceId) {
         this.resourceId = resourceId;
     }
 

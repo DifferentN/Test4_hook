@@ -61,6 +61,8 @@ public class LocalActivityReceiver extends BroadcastReceiver {
     private boolean isOpen,isAtSameApp;
     private String packageName,tarActivityName,dataUri;
 
+    private int time = 0;
+    private int eventTime = 0;
     public LocalActivityReceiver(Activity activity){
         selfActivity = activity;
         selfActivityName = activity.getComponentName().getClassName();
@@ -94,6 +96,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
 //                Log.i("LZH",selfActivityName+" show activity: "+showActivityName);
                 break;
             case LocalActivityReceiver.openTargetActivityByIntent:
+
                 Intent tarIntent = intent.getParcelableExtra(LocalActivityReceiver.TARGET_INTENT);
                 startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityStart);
                 Log.i("LZH","self: "+selfActivityName+"start: "+startActivityFrom);
@@ -105,15 +108,18 @@ public class LocalActivityReceiver extends BroadcastReceiver {
                 selfActivity.startActivity(tarIntent);
                 break;
             case LocalActivityReceiver.INPUT_TEXT:
+//                Log.i("LZH","InputText : "+time++);
                 textKey = intent.getStringExtra(LocalActivityReceiver.TEXT_KEY);
                 startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityPlay);
+//                Log.i("LZH","selfA: "+selfActivityName+" startF: "+startActivityFrom);
                 if(startActivityFrom.compareTo(selfActivityName)!=0){
                     break;
                 }
-
+                Log.i("LZH"," to InputText");
                 inputText(textKey);
                 break;
             case LocalActivityReceiver.INPUT_EVENT:
+                Log.i("LZH","intput_event: "+eventTime++);
                 eventBytes = intent.getByteArrayExtra(LocalActivityReceiver.EVENTS);
                 //在指定的页面播放点击事件
                 startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityPlay);

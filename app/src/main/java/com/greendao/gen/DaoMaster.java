@@ -21,22 +21,12 @@ public class DaoMaster extends AbstractDaoMaster {
 
     /** Creates underlying database table using DAOs. */
     public static void createAllTables(Database db, boolean ifNotExists) {
-        ActivityDataDao.createTable(db, ifNotExists);
-        AppDataDao.createTable(db, ifNotExists);
-        IntentDataDao.createTable(db, ifNotExists);
         JoinResourceActivityDao.createTable(db, ifNotExists);
-        MotionDataDao.createTable(db, ifNotExists);
-        ResourceDataDao.createTable(db, ifNotExists);
     }
 
     /** Drops underlying database table using DAOs. */
     public static void dropAllTables(Database db, boolean ifExists) {
-        ActivityDataDao.dropTable(db, ifExists);
-        AppDataDao.dropTable(db, ifExists);
-        IntentDataDao.dropTable(db, ifExists);
         JoinResourceActivityDao.dropTable(db, ifExists);
-        MotionDataDao.dropTable(db, ifExists);
-        ResourceDataDao.dropTable(db, ifExists);
     }
 
     /**
@@ -55,12 +45,7 @@ public class DaoMaster extends AbstractDaoMaster {
 
     public DaoMaster(Database db) {
         super(db, SCHEMA_VERSION);
-        registerDaoClass(ActivityDataDao.class);
-        registerDaoClass(AppDataDao.class);
-        registerDaoClass(IntentDataDao.class);
         registerDaoClass(JoinResourceActivityDao.class);
-        registerDaoClass(MotionDataDao.class);
-        registerDaoClass(ResourceDataDao.class);
     }
 
     public DaoSession newSession() {

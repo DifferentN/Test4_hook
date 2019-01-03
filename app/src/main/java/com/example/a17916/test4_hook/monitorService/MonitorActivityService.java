@@ -43,6 +43,7 @@ public class MonitorActivityService extends Service{
     public static final String DESTROY_ACTIVITY_NAME = "destroyActivityName";
 
     public static final String ON_DRAW = "onDraw";
+    public static final String INPUTED_TEXT = "inputedText";
     public static final String VIEW_TYPE = "viewType";
     public static final int EDITTEXT = 1;
     public static final int OTHERVIEW = 2;
@@ -85,6 +86,7 @@ public class MonitorActivityService extends Service{
         intentFilter.addAction(MonitorActivityService.ON_RESUME_STATE);
         intentFilter.addAction(MonitorActivityService.ON_DESTROY_STATE);
         intentFilter.addAction(MonitorActivityService.ON_DRAW);
+        intentFilter.addAction(MonitorActivityService.INPUTED_TEXT);
         registerReceiver(openActivityReceiver,intentFilter);
 
         saveMotionRecevier = new SaveMotionReceiver(this);

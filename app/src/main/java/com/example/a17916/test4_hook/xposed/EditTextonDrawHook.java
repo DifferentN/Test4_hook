@@ -41,7 +41,9 @@ public class EditTextonDrawHook extends XC_MethodHook {
         Intent intent = new Intent();
         intent.setAction(MonitorActivityService.ON_DRAW);
         intent.putExtra(MonitorActivityService.VIEW_TYPE,MonitorActivityService.EDITTEXT);
-        context.sendBroadcast(intent);
 
+        context.sendBroadcast(intent);
+        time = 0;
+//        Log.i("LZH","get onDraw");
     }
 }

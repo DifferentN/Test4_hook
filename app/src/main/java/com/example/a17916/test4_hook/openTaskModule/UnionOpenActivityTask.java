@@ -16,6 +16,9 @@ public class UnionOpenActivityTask extends OpenActivityTask {
     private ArrayList<StepContent> steps;
     private StepContent curStep;
     private String curActivityName;
+    private String requireActivityName;
+
+    private int time = 5;
 
     public UnionOpenActivityTask(MyActivityHandler handler){
         super(handler,null);
@@ -60,15 +63,19 @@ public class UnionOpenActivityTask extends OpenActivityTask {
             Log.i("LZH","出错，无法取得任务的下一步");
             myHandler.setFinishedTask(this);
         }
-//        curStep = steps.get(0);
-//        curActivityName = intent.getStringExtra(MonitorActivityService.CREATE_ACTIVITY_NAME);
-//        if(curStep.getStepCondition().canExecute(curActivityName)){
-//            executeStep(curStep,operation);
-//            steps.remove(0);
-//        }
 
         curStep = steps.get(0);
-        curActivityName = curStep.getActivityName();
+        curActivityName = intent.getStringExtra(MonitorActivityService.RESUME_ACTIVITY_NAME);
+        requireActivityName = curStep.getActivityName();
+        Log.i("LZH","requ: "+requireActivityName+" cur: "+curActivityName);
+        Log.i("LZH","step type: "+curStep.getStepType());
+//        if(curStep.getStepType()==StepContent.MOTION_EVENT_TYPE){
+//            //不能在打开页面时，播放点击事件
+//            return;
+//        }
+        if(!curActivityName.equals(requireActivityName)){
+            return;
+        }
         executeStep(curStep,operation);
         steps.remove(0);
 
@@ -79,25 +86,30 @@ public class UnionOpenActivityTask extends OpenActivityTask {
 
     @Override
     public void onDestroyActivity(Operation operation, Intent intent) {
-        if(!isStepsAvailable()){
-            Log.i("LZH","出错，无法取得任务的下一步");
-            myHandler.setFinishedTask(this);
-        }
-//        curStep = steps.get(0);
-//        curActivityName = intent.getStringExtra(MonitorActivityService.CREATE_ACTIVITY_NAME);
-//        if(curStep.getStepCondition().canExecute(curActivityName)){
-//            executeStep(curStep,operation);
-//            steps.remove(0);
+//        if(!isStepsAvailable()){
+//            Log.i("LZH","出错，无法取得任务的下一步");
+//            myHandler.setFinishedTask(this);
 //        }
-
-        curStep = steps.get(0);
-        curActivityName = curStep.getActivityName();
-        executeStep(curStep,operation);
-        steps.remove(0);
-
-        if(!isStepsAvailable()){
-            myHandler.setFinishedTask(this);
-        }
+////        curStep = steps.get(0);
+////        curActivityName = intent.getStringExtra(MonitorActivityService.CREATE_ACTIVITY_NAME);
+////        if(curStep.getStepCondition().canExecute(curActivityName)){
+////            executeStep(curStep,operation);
+////            steps.remove(0);
+////        }
+//
+//        curStep = steps.get(0);
+//        curActivityName = intent.getStringExtra(MonitorActivityService.DESTROY_ACTIVITY_NAME);
+//        requireActivityName = curStep.getActivityName();
+//        if(!curActivityName.equals(requireActivityName)){
+//            return;
+//        }
+//
+//        executeStep(curStep,operation);
+//        steps.remove(0);
+//
+//        if(!isStepsAvailable()){
+//            myHandler.setFinishedTask(this);
+//        }
     }
 
     @Override
@@ -106,14 +118,19 @@ public class UnionOpenActivityTask extends OpenActivityTask {
             Log.i("LZH","出错，无法取得任务的下一步");
             myHandler.setFinishedTask(this);
         }
-//        curStep = steps.get(0);
-//        curActivityName = intent.getStringExtra(MonitorActivityService.CREATE_ACTIVITY_NAME);
-//        if(curStep.getStepCondition().canExecute(curActivityName)){
-//            executeStep(curStep,operation);
-//            steps.remove(0);
-//        }
+
+        Log.i("LZH","time: "+time);
+        if(--time>0){
+            //多次发送绘制完成广播，保证显示出搜索结果
+            return;
+        }
         curStep = steps.get(0);
-        curActivityName = curStep.getActivityName();
+//        curActivityName = intent.getStringExtra(MonitorActivityService.CREATE_ACTIVITY_NAME);
+        requireActivityName = curStep.getActivityName();
+//        if(!curActivityName.equals(requireActivityName)){
+//            return;
+//        }
+
         executeStep(curStep,operation);
         steps.remove(0);
 
@@ -134,20 +151,38 @@ public class UnionOpenActivityTask extends OpenActivityTask {
     private void executeStep(StepContent step,Operation operation){
         switch (step.getStepType()){
             case StepContent.INTENT_TYPE:
-                operation.operationStartActivity(step.getSendIntent(),curActivityName);
+                operation.operationStartActivity(step.getSendIntent(),requireActivityName);
                 break;
             case StepContent.INPUT_TEXT_TYPE:
-                operation.operationReplayInputEvent(step.getInputText(),curActivityName);
+                operation.operationReplayInputEvent(step.getInputText(),requireActivityName);
                 break;
             case StepContent.MOTION_EVENT_TYPE:
                 //延时1s保证点击事件的播放
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                operation.operationReplayMotionEvent(step.getEventBytes(),curActivityName);
+
+                operation.operationReplayMotionEvent(step.getEventBytes(),requireActivityName);
+//                Thread thread = new Thread(new EventRunnable(step,operation,requireActivityName));
+//                thread.start();
                 break;
+        }
+    }
+    public static class EventRunnable implements Runnable{
+
+        private Operation operation;
+        private StepContent step;
+        private String requireActivityName;
+        public EventRunnable(StepContent step,Operation operation,String requireActivityName){
+            this.operation = operation;
+            this.requireActivityName = requireActivityName;
+            this.step = step;
+        }
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            operation.operationReplayMotionEvent(step.getEventBytes(),requireActivityName);
         }
     }
 }

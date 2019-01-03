@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
+import com.example.a17916.test4_hook.database.ActivityData;
+import com.example.a17916.test4_hook.database.AppData;
 import com.example.a17916.test4_hook.database.QueryManager;
 
 import org.w3c.dom.Document;
@@ -48,19 +50,21 @@ public class TaskGenerator {
         queryManager = QueryManager.getInstance();
     }
 
-    public UnionOpenActivityTask generatorTask(Long activityId,String resType,String resEntityName,
-                                               Long resId){
+    public UnionOpenActivityTask generatorTask(int activityId,String resType,String resEntityName,
+                                               int resId){
         String activityName = QueryManager.getInstance().queryActivityNameByActivityId(activityId);
 
         return generatorTask(activityName,resType,resEntityName,resId);
     }
     public UnionOpenActivityTask generatorTask(String activityName,String resType,String resEntityName,
-                                               Long resId){
+                                               int resId){
         File file = findModuleTaskFile(activityName,resType);
+        Log.i("LZH","file aN: "+activityName+"resType: "+resType);
         if(file == null){
             Log.i("LZH","未能找到任务模板文件");
             return  null;
         }
+
         UnionOpenActivityTask task = createTask(file,resId,resType,resEntityName,activityName);
 
         return task;
@@ -81,7 +85,6 @@ public class TaskGenerator {
             Log.i("LZH","文件夹不存在： "+path);
             return null;
         }
-
 
         for (File file:dir.listFiles()){
             if(checkFile(activityName,resType,file)){
@@ -137,7 +140,7 @@ public class TaskGenerator {
      * @param text 资源的名称 可以作为搜索词使用
      * @return 要执行的任务任务
      */
-    private UnionOpenActivityTask createTask(File file,Long resId,String resType,String text,String activityName){
+    private UnionOpenActivityTask createTask(File file,int resId,String resType,String text,String activityName){
 
         DocumentBuilder builder = null;
         try {
@@ -166,15 +169,18 @@ public class TaskGenerator {
                 type = element.getAttribute(TaskGenerator.Attr_Type);
                 //根据type 来确定下一步是什么操作
                 if(type.equals(Type_Intent)){
+                    Log.i("LZH","type: "+resType+" resname: "+text+" intent step ");
                     //Intent操作，用资源ID和activity名称确定
                     targetActivityName = element.getAttribute(Attr_TargetActivityName);
                     createIntentStep(resId,activityName,targetActivityName);
                 }else if(type.equals(Type_Text)){
                     //输入文本操作，只需要 搜索词
+                    Log.i("LZH","type: "+resType+" resname: "+text+" text step ");
                     targetActivityName = element.getAttribute(Attr_TargetActivityName);
                     createTextStep(text,targetActivityName);
                 }else if(type.equals(Type_MotionEvent)){
                     //点击事件 用Activity名称，资源类型，事件顺序确定
+                    Log.i("LZH","type: "+resType+" resname: "+text+" motion step ");
                     targetActivityName = element.getAttribute(Attr_TargetActivityName);
                     seq = Integer.valueOf(element.getAttribute(Attr_MotionEventSeq));
                     createMotionEventSteo(targetActivityName,resType,seq);
@@ -195,7 +201,7 @@ public class TaskGenerator {
      * @param activityName 显示资源的页面
      * @param fromActivityName 指定step在哪个页面发生，由任务模板指定
      */
-    private void createIntentStep(Long resId,String activityName,String fromActivityName){
+    private void createIntentStep(int resId,String activityName,String fromActivityName){
         Intent intent = queryManager.queryIntent(activityName,resId);
         taskBuilder.addIntentStep(intent,fromActivityName);
     }

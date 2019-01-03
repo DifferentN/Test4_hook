@@ -7,14 +7,16 @@ import org.greenrobot.greendao.annotation.ToMany;
 import java.util.List;
 import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.DaoException;
-import com.greendao.gen.DaoSession;
-import com.greendao.gen.AppDataDao;
-import com.greendao.gen.ResourceDataDao;
 
-@Entity
+
 public class AppData {
-    @Id(autoincrement = true)
-    private Long appId;
+    public static final String tableName = "AppDataTable";
+    public static final String AppId = "AppId"; //int auto pre key
+    public static final String AppName = "AppName"; // Text
+    public static final String Version = "Version"; //Text unique(AppName,Version)
+    public static final String PackageName = "PackageName"; // Text
+
+    private int appId;
 
     private String appName;
 
@@ -22,169 +24,47 @@ public class AppData {
 
     private String packageName;
 
-    private Long resId;
-    @ToMany(referencedJoinProperty = "resId")
-    private List<ResourceData> resourceDatas;
+//    private Long resId;
+//
+//    private List<ResourceData> resourceDatas;
 
 
-    /** Used to resolve relations */
-    @Generated(hash = 2040040024)
-    private transient DaoSession daoSession;
-
-    /** Used for active entity operations. */
-    @Generated(hash = 679872930)
-    private transient AppDataDao myDao;
-
-
-    public AppData(Long appId,String appName,String version,String packageName){
+    public AppData(int appId,String appName,String version,String packageName){
         this.appId = appId;
         this.appName = appName;
         this.version = version;
         this.packageName = packageName;
     }
 
-
-    @Generated(hash = 847495512)
-    public AppData(Long appId, String appName, String version, String packageName, Long resId) {
-        this.appId = appId;
-        this.appName = appName;
-        this.version = version;
-        this.packageName = packageName;
-        this.resId = resId;
+    public int getAppId() {
+        return appId;
     }
-
-
-    @Generated(hash = 1112619805)
-    public AppData() {
-    }
-
-
-    public Long getAppId() {
-        return this.appId;
-    }
-
-
-    public void setAppId(Long appId) {
-        this.appId = appId;
-    }
-
 
     public String getAppName() {
-        return this.appName;
+        return appName;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public String getPackageName() {
+        return packageName;
+    }
+
+    public void setAppId(int appId) {
+        this.appId = appId;
+    }
 
     public void setAppName(String appName) {
         this.appName = appName;
     }
 
-
-    public String getVersion() {
-        return this.version;
-    }
-
-
     public void setVersion(String version) {
         this.version = version;
     }
 
-
-    public Long getResId() {
-        return this.resId;
-    }
-
-
-    public void setResId(Long resId) {
-        this.resId = resId;
-    }
-
-
-    /**
-     * To-many relationship, resolved on first access (and after reset).
-     * Changes to to-many relations are not persisted, make changes to the target entity.
-     */
-    @Generated(hash = 2049503295)
-    public List<ResourceData> getResourceDatas() {
-        if (resourceDatas == null) {
-            final DaoSession daoSession = this.daoSession;
-            if (daoSession == null) {
-                throw new DaoException("Entity is detached from DAO context");
-            }
-            ResourceDataDao targetDao = daoSession.getResourceDataDao();
-            List<ResourceData> resourceDatasNew = targetDao
-                    ._queryAppData_ResourceDatas(appId);
-            synchronized (this) {
-                if (resourceDatas == null) {
-                    resourceDatas = resourceDatasNew;
-                }
-            }
-        }
-        return resourceDatas;
-    }
-
-
-    /** Resets a to-many relationship, making the next get call to query for a fresh result. */
-    @Generated(hash = 231864259)
-    public synchronized void resetResourceDatas() {
-        resourceDatas = null;
-    }
-
-
-    /**
-     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#delete(Object)}.
-     * Entity must attached to an entity context.
-     */
-    @Generated(hash = 128553479)
-    public void delete() {
-        if (myDao == null) {
-            throw new DaoException("Entity is detached from DAO context");
-        }
-        myDao.delete(this);
-    }
-
-
-    /**
-     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#refresh(Object)}.
-     * Entity must attached to an entity context.
-     */
-    @Generated(hash = 1942392019)
-    public void refresh() {
-        if (myDao == null) {
-            throw new DaoException("Entity is detached from DAO context");
-        }
-        myDao.refresh(this);
-    }
-
-
-    /**
-     * Convenient call for {@link org.greenrobot.greendao.AbstractDao#update(Object)}.
-     * Entity must attached to an entity context.
-     */
-    @Generated(hash = 713229351)
-    public void update() {
-        if (myDao == null) {
-            throw new DaoException("Entity is detached from DAO context");
-        }
-        myDao.update(this);
-    }
-
-
-    /** called by internal mechanisms, do not call yourself. */
-    @Generated(hash = 211212037)
-    public void __setDaoSession(DaoSession daoSession) {
-        this.daoSession = daoSession;
-        myDao = daoSession != null ? daoSession.getAppDataDao() : null;
-    }
-
-
-    public String getPackageName() {
-        return this.packageName;
-    }
-
-
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
-
-
 }

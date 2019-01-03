@@ -40,12 +40,14 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
     private ArrayMap<String,Boolean> mapIsOpened;
 
     private boolean isPlayEvent = false;
+    private boolean isInputedText = false;
     private String text;
     private byte[] eventBytes;
 
     //记录App打开的页面，当>=2个时，打开目标页面
     private ArrayMap<String,HashMap<String,Boolean>> record;
-    private HashMap<String,Boolean> hashMap;
+    //记录页面打开时间
+    private HashMap<String,Long> hashMap;
     private MyActivityHandler myHandler;
     public MonitorActivityReceiver(Service service){
         this.service = service;
@@ -54,6 +56,8 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
         mapIsOpened = new ArrayMap<>();
         record = new ArrayMap<>();
         myHandler = MyActivityHandler.getInstance();
+
+        hashMap = new HashMap<>();
     }
 
     @Override
@@ -65,14 +69,23 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
                 myHandler.onCreateActivity(this,intent);
                 break;
             case MonitorActivityService.ON_RESUME_STATE:
-//                Log.i("LZH","收到显示的页面");
-                myHandler.onResumeActivity(this,intent);
+                Log.i("LZH","收到显示的页面");
+                if(!isRepeat(intent)){
+                    myHandler.onResumeActivity(this,intent);
+                }
+
                 break;
             case MonitorActivityService.ON_DESTROY_STATE:
                 myHandler.onDestroyActivity(this,intent);
                 break;
+            case MonitorActivityService.INPUTED_TEXT:
+                isInputedText = true;
             case MonitorActivityService.ON_DRAW:
-                myHandler.onDrawView(this,intent);
+                if(isInputedText){
+                    myHandler.onDrawView(this,intent);
+                }
+//                isInputedText = false;
+
         }
 
     }
@@ -120,5 +133,28 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
         broadIntent.putExtra(LocalActivityReceiver.EVENTS,events);
         broadIntent.putExtra(LocalActivityReceiver.fromActivityPlay,fromActivity);
         service.sendBroadcast(broadIntent);
+    }
+
+    /**
+     * 检查页面是否被重复打开
+     * @param intent
+     * @return true 表示重复 ; false 表示是未在短时间内重复打开
+     */
+    private boolean isRepeat(Intent intent){
+        String activityName = intent.getStringExtra(MonitorActivityService.RESUME_ACTIVITY_NAME);
+        long preTime = 0,curTime = System.currentTimeMillis();
+        if(hashMap.get(activityName)!=null){
+            preTime = hashMap.get(activityName);
+        }
+        hashMap.put(activityName,curTime);
+        Log.i("LZH","preTime: "+preTime+" curTime: "+curTime);
+        if(curTime-preTime>1000){
+            Log.i("LZH","显示："+activityName);
+            return  false;
+        }else {
+            return true;
+        }
+
+
     }
 }

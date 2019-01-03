@@ -9,6 +9,7 @@ import android.os.Parcel;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import com.example.a17916.test4_hook.database.AppData;
 import com.example.a17916.test4_hook.database.SaveManager;
 import com.example.a17916.test4_hook.share.SavePreference;
 
@@ -28,6 +29,8 @@ public class SaveMotionReceiver extends BroadcastReceiver {
     private int SAVE_Event = 0x01;
     private int NOR_SAVE_Event = 0x00;
 
+    private SaveManager saveManager;
+
     public SaveMotionReceiver(Context context){
         this.context = context;
         preference = SavePreference.getInstance(context.getApplicationContext());
@@ -43,7 +46,10 @@ public class SaveMotionReceiver extends BroadcastReceiver {
             case MonitorActivityService.saveIntentInfo:
                 break;
             case MonitorActivityService.SAVE_MOTION_EVENT:
-                tempSaveMotionEvent(intent);
+                if((SAVE_STATE&SAVE_Event)!=0){
+                    tempSaveMotionEvent(intent);
+                }
+
             case MonitorActivityService.SAVE_EDIT_TEXT:
                 prepareSaveEvent = true;
                 editText = intent.getStringExtra(MonitorActivityService.EDIT_TEXT);
@@ -104,18 +110,46 @@ public class SaveMotionReceiver extends BroadcastReceiver {
     }
 
     private void saveByDB(){
+//        saveYiDaoSearch();
+        saveTaoPiaoPiao();
+    }
+
+    private void saveYiDaoSearch(){
         SaveManager saveManager = SaveManager.getInstance();
         String activityName = saveActivity;
         String resType = null;
         if(activityName.equals("com.yongche.android.YDBiz.Order.HomePage.MainActivity")||
                 activityName.equals("com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity")){
-            resType = "UseCar";
+            resType = "搜索";
         }
-        long seq = 0;
+        int seq = 0;
         if(activityName.equals("com.yongche.android.YDBiz.Order.HomePage.MainActivity")){
             seq = 1;
         }else if(activityName.equals("com.yongche.android.YDBiz.Order.DataSubpage.address.StartEndAddress.OSearchAddressEndActivity")){
             seq = 2;
+        }
+
+        Parcel parcel = writeMotionEvents(preEvents);
+        if(parcel==null){
+            Log.i("LZH","保存点击事件失败");
+            return ;
+        }
+        bytes = parcel.marshall();
+
+        Log.i("LZH","保存点击事件");
+        saveManager.saveMotionEvent(activityName,resType,seq,bytes);
+    }
+
+    private void saveTaoPiaoPiao(){
+        SaveManager saveManager = SaveManager.getInstance();
+        String activityName = saveActivity;
+        String resType = null;
+        if(activityName.equals("com.taobao.movie.android.app.search.MVGeneralSearchViewActivity")){
+            resType = "搜索";
+        }
+        int seq = 0;
+        if(activityName.equals("com.taobao.movie.android.app.search.MVGeneralSearchViewActivity")){
+            seq = 1;
         }
 
         Parcel parcel = writeMotionEvents(preEvents);

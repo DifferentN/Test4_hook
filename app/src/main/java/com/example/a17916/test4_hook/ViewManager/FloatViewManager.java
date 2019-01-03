@@ -75,6 +75,12 @@ public class FloatViewManager {
                 Intent intent = new Intent();
                 intent.setAction(LocalActivityReceiver.viewTree);
                 context.sendBroadcast(intent);
+
+//                Intent intent =new Intent();
+//                intent.setAction(LocalActivityReceiver.INPUT_TEXT);
+//                intent.putExtra(LocalActivityReceiver.TEXT_KEY,"来电狂响");
+//                intent.putExtra(LocalActivityReceiver.fromActivityPlay,"com.taobao.movie.android.app.search.MVGeneralSearchViewActivity");
+//                context.sendBroadcast(intent);
             }
         });
 

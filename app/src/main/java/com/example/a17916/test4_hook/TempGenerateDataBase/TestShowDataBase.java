@@ -1,5 +1,7 @@
 package com.example.a17916.test4_hook.TempGenerateDataBase;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.example.a17916.test4_hook.application.MyApplication;
@@ -7,22 +9,17 @@ import com.example.a17916.test4_hook.database.ActivityData;
 import com.example.a17916.test4_hook.database.AppData;
 import com.example.a17916.test4_hook.database.IntentData;
 import com.example.a17916.test4_hook.database.ResourceData;
-import com.greendao.gen.ActivityDataDao;
-import com.greendao.gen.AppDataDao;
-import com.greendao.gen.DaoSession;
-import com.greendao.gen.IntentDataDao;
-import com.greendao.gen.ResourceDataDao;
 
 import java.util.List;
 
 public class TestShowDataBase {
     private MyApplication myApplication;
-    private DaoSession mDaoSession;
+    private SQLiteDatabase database;
     public static TestShowDataBase testShowDataBase;
 
     public TestShowDataBase(){
         myApplication = MyApplication.getInstance();
-        mDaoSession = myApplication.getDaoSession();
+        database = myApplication.getSqLiteDatabase();
     }
 
     public static TestShowDataBase getInstance(){
@@ -38,68 +35,69 @@ public class TestShowDataBase {
         showActivityData();
         showIntentData();
 
+
     }
     private void showAppData(){
-        AppDataDao appDataDao = mDaoSession.getAppDataDao();
-        List<AppData> appDatas = appDataDao.loadAll();
-        if(appDatas.size()<1){
-            Log.i("LZH","没有App数据");
-            return ;
-        }
+        Cursor cursor = database.query(AppData.tableName,null,null,null,null,null,null);
+        String appName,appVersion,appId;
         Log.i("LZH","App数据   *********");
-        for(AppData appData:appDatas){
-            Log.i("LZH","AppId: "+appData.getAppId()+" App名称: "+appData.getAppName()+" App版本: "+appData.getVersion());
+        while (cursor.moveToNext()){
+            appId = cursor.getInt(0)+"";
+            appName = cursor.getString(1);
+            appVersion = cursor.getString(2);
+            Log.i("LZH","AppId: "+appId+" App名称: "+appName+" App版本: "+appVersion);
         }
-        Log.i("LZH","App数据   *********");
-
+        cursor.close();
     }
 
     private void showResourceData(){
-        ResourceDataDao resourceDataDao = mDaoSession.getResourceDataDao();
-        List<ResourceData> resDatas = resourceDataDao.loadAll();
-        if(resDatas.size()<1){
-            Log.i("LZH","没有资源数据");
-            return ;
-        }
+        Cursor cursor = database.query(ResourceData.ResourceTable,null,null,null,null,null,null);
+        String resId,resName,resType,appId;
         Log.i("LZH","资源数据   *********");
-        for(ResourceData resData:resDatas){
-            Log.i("LZH","资源Id: "+resData.getResId()+" AppId: "+resData.getAppId()+" 资源类别: "+resData.getResCategory()+" 资源名称: "+resData.getResEntityName());
+        while (cursor.moveToNext()){
+            resId = cursor.getInt(0)+"";
+            resName = cursor.getString(1);
+            resType = cursor.getString(2);
+            appId = cursor.getInt(3)+"";
+            Log.i("LZH","资源Id: "+resId+" AppId: "+appId+" 资源类别: "+resType+" 资源名称: "+resName);
         }
-        Log.i("LZH","资源数据   *********");
+        cursor.close();
     }
 
     private void showActivityData(){
-        ActivityDataDao activityDataDao = mDaoSession.getActivityDataDao();
-        List<ActivityData> activityDatas = activityDataDao.loadAll();
-        if(activityDatas.size()<1){
-            Log.i("LZH","没有资源页面映射数据");
-            return ;
+        Cursor cursor = database.query(ActivityData.tableName,null,null,null,null,null,null);
+        String activiyId,activiyName,appId,resId;
+        Log.i("LZH","源页面映射数据   *********");
+        while (cursor.moveToNext()){
+            activiyId = cursor.getInt(0)+"";
+            activiyName = cursor.getString(1);
+            appId = cursor.getInt(2)+"";
+            resId = cursor.getInt(3)+"";
+            Log.i("LZH","页面Id: "+activiyId+"页面名称 : "+activiyName+" AppId: "+appId+" 资源Id "+resId);
         }
         Log.i("LZH","源页面映射数据   *********");
-        for(ActivityData activityData:activityDatas){
-            String info = "页面Id: "+activityData.getActivityId()+" AppId: "+activityData.getAppId()+" 页面名称: "+activityData.getActivityName();
-            List<ResourceData> resDatas = activityData.getResourceDatas();
-            for(ResourceData resData:resDatas){
-                Log.i("LZH",info+" 资源名称: "+resData.getResEntityName());
-            }
-        }
-        Log.i("LZH","源页面映射数据   *********");
+        cursor.close();
     }
 
     private void showIntentData(){
-        IntentDataDao intentDataDao = mDaoSession.getIntentDataDao();
-        List<IntentData> intentDatas = intentDataDao.loadAll();
-        if(intentDatas.size()<1){
-            Log.i("LZH","没有Intent数据");
-            return ;
-        }
+        Cursor cursor = database.query(IntentData.IntentTable,null,null,null,null,null,null);
+        String intentId,activityId,resId;
+        boolean hasByte = false;
         Log.i("LZH","Intent数据   *********");
-        String info1 = "null",info2="NotNull";
-        String info = null;
-        for(IntentData intentData:intentDatas){
-            info = intentData.getBytes()==null?info1:info2;
-            Log.i("LZH","页面Id: "+intentData.getActivityId()+" 资源Id: "+intentData.getResId()+" intent:"+info);
+        while (cursor.moveToNext()){
+            intentId = cursor.getInt(0)+"";
+            activityId = cursor.getInt(2)+"";
+            resId = cursor.getInt(3)+"";
+            if(cursor.getString(1)==null){
+                hasByte = false;
+            }else{
+                hasByte = true;
+            }
+            Log.i("LZH","IntentId: "+intentId+" 页面Id: "+activityId+" 资源Id: "+resId+" intent:"+hasByte);
+
         }
+        cursor.close();
+
         Log.i("LZH","Intent数据   *********");
     }
 }
