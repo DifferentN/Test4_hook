@@ -59,7 +59,7 @@ public class TaskGenerator {
     public UnionOpenActivityTask generatorTask(String activityName,String resType,String resEntityName,
                                                int resId){
         File file = findModuleTaskFile(activityName,resType);
-        Log.i("LZH","file aN: "+activityName+"resType: "+resType);
+//        Log.i("LZH","file aN: "+activityName+"resType: "+resType);
         if(file == null){
             Log.i("LZH","未能找到任务模板文件");
             return  null;
@@ -203,11 +203,13 @@ public class TaskGenerator {
      */
     private void createIntentStep(int resId,String activityName,String fromActivityName){
         Intent intent = queryManager.queryIntent(activityName,resId);
-        taskBuilder.addIntentStep(intent,fromActivityName);
+        String appName = queryManager.queryAppDataByActivityName(activityName).getAppName();
+        taskBuilder.addIntentStep(intent,fromActivityName,appName);
     }
     //
     private void createTextStep(String text,String activityName){
-        taskBuilder.addTextStep(text,activityName);
+        String appName = queryManager.queryAppDataByActivityName(activityName).getAppName();
+        taskBuilder.addTextStep(text,activityName,appName);
     }
 
     /**
@@ -218,6 +220,7 @@ public class TaskGenerator {
      */
     private void createMotionEventSteo(String activityName,String resType,int seq){
         byte [] bytes = queryManager.queryMotionEvent(activityName,resType,seq);
-        taskBuilder.addMotionEventStep(bytes,activityName);
+        String appName = queryManager.queryAppDataByActivityName(activityName).getAppName();
+        taskBuilder.addMotionEventStep(bytes,activityName,appName);
     }
 }

@@ -1,7 +1,9 @@
 package com.example.a17916.test4_hook.activity.showResult;
 
 
+import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 
 import com.example.a17916.test4_hook.manageActivity.ActivityController;
@@ -16,11 +18,13 @@ public class ItemListener implements RecyclerViewItemListener {
     private Context context;
     private ActivityController controller;
     private TaskGenerator taskGenerator;
+    private Activity activity;
     public ItemListener(List<ShowItem> list,Context context){
         this.list = list;
         this.context = context;
         controller = ActivityController.getInstance(context);
         taskGenerator = new TaskGenerator(context);//转为getInstance
+        activity = (Activity) context;
     }
     @Override
     public void onItemClick(View view, int pos) {
@@ -40,6 +44,7 @@ public class ItemListener implements RecyclerViewItemListener {
                 item.getResEntityName(),item.getResourceId());
         controller.addTask(item.getPkName(),task);
 
+//        activity.finish();
 
     }
 

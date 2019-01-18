@@ -22,7 +22,9 @@ import com.example.a17916.test4_hook.TestGenerateTemple.AnalysePageRawDataTool;
 import com.example.a17916.test4_hook.TestGenerateTemple.PageResult;
 import com.example.a17916.test4_hook.TestGenerateTemple.TestGenerateTemple;
 import com.example.a17916.test4_hook.activity.showResult.AnalyseResultActivity;
+import com.example.a17916.test4_hook.manageActivity.ActivityController;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+import com.example.a17916.test4_hook.util.normal.AppUtil;
 import com.example.a17916.test4_hook.view_data.MyViewNode;
 import com.example.a17916.test4_hook.view_data.MyViewTree;
 
@@ -44,6 +46,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
 
     public static final String GenerateIntentData = "GenerateIntentData";
 
+    public static final String fromAppStart = "fromAppStart";
     public static final String fromActivityStart ="fromActivityStart";
     public static final String fromActivityPlay = "fromActivityPlay";
     public static final String TARGET_INTENT = "targetIntent";
@@ -52,10 +55,14 @@ public class LocalActivityReceiver extends BroadcastReceiver {
 
     private String showActivityName = "";
     private String selfActivityName = "";
+    private String selfPackageName;
+    private String selfAppName;
     private String curPackageName = "";
+    private String curAppName;
     private String textKey ;
     private byte[] eventBytes;
     private String startActivityFrom;
+    private String startActivityFromApp;
 
     private HashMap<String ,Integer> startActivity;
     private boolean isOpen,isAtSameApp;
@@ -66,6 +73,8 @@ public class LocalActivityReceiver extends BroadcastReceiver {
     public LocalActivityReceiver(Activity activity){
         selfActivity = activity;
         selfActivityName = activity.getComponentName().getClassName();
+        selfPackageName = activity.getPackageName();
+        selfAppName = AppUtil.getAppName(selfActivity);
         startActivity = new HashMap<>();
     }
 
@@ -75,13 +84,14 @@ public class LocalActivityReceiver extends BroadcastReceiver {
         switch (action){
             case LocalActivityReceiver.viewTree:
 //                Log.i("LZH","activity: "+selfActivityName);
+                //分析当前页面的信息
                 if(selfActivityName.equals(showActivityName)){
 //                    Log.i("LZH","send View Tree  "+selfActivityName);
 //                    sendViewTree(context);
                     ArrayList<PageResult> pageResults = analyseViewTree(context);
 
                     Intent openInfo = getShowIntent(pageResults);
-                    selfActivity.startActivity(openInfo);
+//                    selfActivity.startActivity(openInfo);
                     Log.i("LZH","open window");
                 }else{
 //                    Log.i("LZH","not open window "+selfActivityName+"  show "+showActivityName);
@@ -93,14 +103,20 @@ public class LocalActivityReceiver extends BroadcastReceiver {
                 Bundle bundle = intent.getBundleExtra("currentActivity");
                 showActivityName = (String) bundle.get("showActivity");
                 curPackageName = (String)bundle.get("curPackage");
+                curAppName = (String) bundle.get("curApp");
 //                Log.i("LZH",selfActivityName+" show activity: "+showActivityName);
                 break;
             case LocalActivityReceiver.openTargetActivityByIntent:
-
                 Intent tarIntent = intent.getParcelableExtra(LocalActivityReceiver.TARGET_INTENT);
                 startActivityFrom = intent.getStringExtra(LocalActivityReceiver.fromActivityStart);
-                Log.i("LZH","self: "+selfActivityName+"start: "+startActivityFrom);
-                if(startActivityFrom.compareTo(selfActivityName)!=0){
+                startActivityFromApp = intent.getStringExtra(LocalActivityReceiver.fromAppStart);
+                Log.i("LZH","self: "+selfAppName+"start: "+startActivityFromApp);
+                //用于未打开App的情况
+//                if(startActivityFrom.compareTo(selfActivityName)!=0){
+//                    break;
+//                }
+                //用于已打开App的情况
+                if(selfAppName.compareTo(startActivityFromApp)!=0||showActivityName.compareTo(selfActivityName)!=0){
                     break;
                 }
                 Log.i("LZH","从"+selfActivityName+"打开"+startActivityFrom);
@@ -173,9 +189,13 @@ public class LocalActivityReceiver extends BroadcastReceiver {
     private Intent getShowIntent(ArrayList<PageResult> pageResults){
         Intent intent = new Intent();
 //        ComponentName componentName = new ComponentName("com.example.a17916.test4_hook","com.example.a17916.test4_hook.activity.ShowActivity");
-        ComponentName componentName = new ComponentName("com.example.a17916.test4_hook","com.example.a17916.test4_hook.activity.showResult.AnalyseResultActivity");
-        intent.setComponent(componentName);
-        intent.putParcelableArrayListExtra(AnalyseResultActivity.PageResult,pageResults);
+//        ComponentName componentName = new ComponentName("com.example.a17916.test4_hook","com.example.a17916.test4_hook.activity.showResult.AnalyseResultActivity");
+//        intent.setComponent(componentName);
+//        intent.putParcelableArrayListExtra(AnalyseResultActivity.PageResult,pageResults);
+        Intent broadIntent = new Intent();
+        broadIntent.setAction(ActivityController.OPEN_ANALYSE_ACTIVITY);
+        broadIntent.putParcelableArrayListExtra(AnalyseResultActivity.PageResult,pageResults);
+        selfActivity.sendBroadcast(broadIntent);
         return  intent;
     }
     private ArrayList<PageResult> analyseViewTree(Context context){
@@ -249,8 +269,8 @@ public class LocalActivityReceiver extends BroadcastReceiver {
         addDataIntent.putExtra(GenerateDataService.ACTIVITY_NAME,selfActivityName);
         addDataIntent.putParcelableArrayListExtra(GenerateDataService.PAGE_INFO,pageResults);
 
-        String appName = testGetAppName();
-        String version = testGetAppVersion();
+        String appName = AppUtil.getAppName(selfActivity);
+        String version = AppUtil.getAppVersion(selfActivity);
 
         addDataIntent.putExtra(GenerateDataService.VERSION,version);
         addDataIntent.putExtra(GenerateDataService.APP_NAME,appName);
@@ -258,33 +278,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
 
         return addDataIntent;
     }
-    private String testGetAppName(){
-        String pkName = selfActivity.getPackageName();
-        PackageManager pm = selfActivity.getPackageManager();
 
-        try {
-            PackageInfo packageInfo = pm.getPackageInfo(pkName,0);
-            int labelRes  = packageInfo.applicationInfo.labelRes;
-//            Log.i("LZH","appName: "+selfActivity.getResources().getString(labelRes));
-            return selfActivity.getResources().getString(labelRes);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-    private String testGetAppVersion(){
-        int version = -1;
-        PackageInfo packageInfo;
-        PackageManager pm = selfActivity.getPackageManager();
-        try {
-            packageInfo = pm.getPackageInfo(selfActivity.getPackageName(),PackageManager.GET_CONFIGURATIONS);
-            version = packageInfo.versionCode;
-            return version+"";
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return  null;
-    }
 
 
 }

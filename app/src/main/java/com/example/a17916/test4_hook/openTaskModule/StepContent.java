@@ -29,6 +29,10 @@ public class StepContent {
         this.stepCondition = stepCondition;
     }
 
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
     public int getStepType() {
         return stepType;
     }

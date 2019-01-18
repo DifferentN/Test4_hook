@@ -1,10 +1,15 @@
 package com.example.a17916.test4_hook.manageActivity;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import com.example.a17916.test4_hook.TestGenerateTemple.PageResult;
+import com.example.a17916.test4_hook.activity.showResult.AnalyseResultActivity;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+
+import java.util.ArrayList;
 
 public class ControllerReciver extends BroadcastReceiver {
     private MonitorActivityService.TransportBinder transportBinder = null;
@@ -35,6 +40,16 @@ public class ControllerReciver extends BroadcastReceiver {
             case ActivityController.OPEN_ACTIVITY:
                 packageName = intent.getStringExtra(ActivityController.PK_NAME);
                 monitorService.openApp(packageName);
+                break;
+            case ActivityController.OPEN_ANALYSE_ACTIVITY:
+                ArrayList<PageResult> pageResults = intent.getParcelableArrayListExtra(AnalyseResultActivity.PageResult);
+                Intent intent1 = new Intent();
+                ComponentName componentName = new ComponentName("com.example.a17916.test4_hook","com.example.a17916.test4_hook.activity.showResult.AnalyseResultActivity");
+                intent1.setComponent(componentName);
+                intent1.putParcelableArrayListExtra(AnalyseResultActivity.PageResult,pageResults);
+                intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                monitorService.startActivity(intent1);
+                break;
         }
     }
 }

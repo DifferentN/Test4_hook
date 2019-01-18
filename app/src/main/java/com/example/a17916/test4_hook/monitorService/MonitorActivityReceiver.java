@@ -85,7 +85,6 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
                     myHandler.onDrawView(this,intent);
                 }
 //                isInputedText = false;
-
         }
 
     }
@@ -114,6 +113,16 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
         broadIntent.putExtra(LocalActivityReceiver.TARGET_INTENT,intent);
         broadIntent.putExtra(LocalActivityReceiver.fromActivityStart,fromActivity);
         broadIntent.setAction(LocalActivityReceiver.openTargetActivityByIntent);
+        service.sendBroadcast(broadIntent);
+    }
+
+    @Override
+    public void operationStartActivity(Intent intent, String fromActivity, String fromApp) {
+        Intent broadIntent = new Intent();
+        broadIntent.putExtra(LocalActivityReceiver.TARGET_INTENT, intent);
+        broadIntent.putExtra(LocalActivityReceiver.fromAppStart,fromApp);
+        broadIntent.setAction(LocalActivityReceiver.openTargetActivityByIntent);
+        Log.i("LZH","打开应用对应页面");
         service.sendBroadcast(broadIntent);
     }
 
@@ -154,7 +163,5 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
         }else {
             return true;
         }
-
-
     }
 }

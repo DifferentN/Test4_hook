@@ -39,6 +39,7 @@ public class MonitorActivityService extends Service{
     public static final String CREATE_ACTIVITY_NAME = "createActivityName";
     public static final String RESUME_PACKAGE_NAME = "resumePackageName";
     public static final String RESUME_ACTIVITY_NAME = "resumeActivityName";
+    public static final String RESUME_APP_NAME = "resumeAppName";
     public static final String DESTROY_PACKAGE_NAME = "destroyPackageName";
     public static final String DESTROY_ACTIVITY_NAME = "destroyActivityName";
 
@@ -115,6 +116,7 @@ public class MonitorActivityService extends Service{
 //
 //    }
     public void openApp(String packageName){
+//        Log.i("LZH","要打开的App: "+packageName);
         Intent openApp = getPackageManager().getLaunchIntentForPackage(packageName);
         startActivity(openApp);
     }

@@ -16,6 +16,7 @@ public class UnionOpenActivityTask extends OpenActivityTask {
     private ArrayList<StepContent> steps;
     private StepContent curStep;
     private String curActivityName;
+    private String curAppName;
     private String requireActivityName;
 
     private int time = 5;
@@ -66,6 +67,7 @@ public class UnionOpenActivityTask extends OpenActivityTask {
 
         curStep = steps.get(0);
         curActivityName = intent.getStringExtra(MonitorActivityService.RESUME_ACTIVITY_NAME);
+        curAppName = intent.getStringExtra(MonitorActivityService.RESUME_APP_NAME);
         requireActivityName = curStep.getActivityName();
         Log.i("LZH","requ: "+requireActivityName+" cur: "+curActivityName);
         Log.i("LZH","step type: "+curStep.getStepType());
@@ -73,7 +75,10 @@ public class UnionOpenActivityTask extends OpenActivityTask {
 //            //不能在打开页面时，播放点击事件
 //            return;
 //        }
-        if(!curActivityName.equals(requireActivityName)){
+        Log.i("LZH","curAppName: "+curAppName+" targetAppName: "+curStep.getAppName());
+        if(curStep.getStepType()!=StepContent.INTENT_TYPE&&!curActivityName.equals(requireActivityName)){
+            return;
+        }else if(curStep.getStepType()==StepContent.INTENT_TYPE&&!curAppName.equals(curStep.getAppName())){
             return;
         }
         executeStep(curStep,operation);
@@ -151,17 +156,17 @@ public class UnionOpenActivityTask extends OpenActivityTask {
     private void executeStep(StepContent step,Operation operation){
         switch (step.getStepType()){
             case StepContent.INTENT_TYPE:
-                operation.operationStartActivity(step.getSendIntent(),requireActivityName);
+                //在未打开对应应用的情况下，使用此方法打开对应的Activity
+//                operation.operationStartActivity(step.getSendIntent(),requireActivityName);
+                //在已经打开App的情况下，使用此方法打开对应的Activity
+                operation.operationStartActivity(step.getSendIntent(),null,
+                        step.getAppName());
                 break;
             case StepContent.INPUT_TEXT_TYPE:
                 operation.operationReplayInputEvent(step.getInputText(),requireActivityName);
                 break;
             case StepContent.MOTION_EVENT_TYPE:
-                //延时1s保证点击事件的播放
-
                 operation.operationReplayMotionEvent(step.getEventBytes(),requireActivityName);
-//                Thread thread = new Thread(new EventRunnable(step,operation,requireActivityName));
-//                thread.start();
                 break;
         }
     }

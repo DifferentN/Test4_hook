@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.example.a17916.test4_hook.database.QueryManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,19 +26,23 @@ public class UnionTaskBuilder extends TaskBuilder {
         steps.add(step);
     }
 
-    public void addIntentStep(Intent intent,String activityName){
+    public void addIntentStep(Intent intent,String activityName,String appName){
         StepContent stepContent = new StepContent(StepContent.INTENT_TYPE,intent,null,null,activityName,null);
+        stepContent.setAppName(appName);
         steps.add(stepContent);
+
     }
 
-    public void addTextStep(String text,String activityName){
+    public void addTextStep(String text,String activityName,String appName){
         Log.i("LZH","要输入的Text: "+text);
         StepContent stepContent = new StepContent(StepContent.INPUT_TEXT_TYPE,null,text,null,activityName,null);
+        stepContent.setAppName(appName);
         steps.add(stepContent);
     }
 
-    public void addMotionEventStep(byte[] bytes,String activityName){
+    public void addMotionEventStep(byte[] bytes,String activityName,String appName){
         StepContent stepContent = new StepContent(StepContent.MOTION_EVENT_TYPE,null,null,bytes,activityName,null);
+        stepContent.setAppName(appName);
         steps.add(stepContent);
     }
 

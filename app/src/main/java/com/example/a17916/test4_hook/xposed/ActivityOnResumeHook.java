@@ -12,6 +12,7 @@ import com.example.a17916.test4_hook.TempGenerateDataBase.GenerateDataService;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityReceiver;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+import com.example.a17916.test4_hook.util.normal.AppUtil;
 
 import java.util.HashMap;
 
@@ -50,6 +51,7 @@ public class ActivityOnResumeHook extends XC_MethodHook {
         Bundle bundle = new Bundle();
         bundle.putString("showActivity",componentName.getClassName());
         bundle.putString("curPackage",componentName.getPackageName());
+        bundle.putString("curApp",AppUtil.getAppName(activity));
         intent.putExtra("currentActivity",bundle);
         activity.sendBroadcast(intent);
 
@@ -57,6 +59,7 @@ public class ActivityOnResumeHook extends XC_MethodHook {
         broad.setAction(MonitorActivityService.ON_RESUME_STATE);
         broad.putExtra(MonitorActivityService.RESUME_PACKAGE_NAME,componentName.getPackageName());
         broad.putExtra(MonitorActivityService.RESUME_ACTIVITY_NAME,componentName.getClassName());
+        broad.putExtra(MonitorActivityService.RESUME_APP_NAME,AppUtil.getAppName(activity));
         activity.sendBroadcast(broad);
 
         //测试中，保存打开应用的Intent

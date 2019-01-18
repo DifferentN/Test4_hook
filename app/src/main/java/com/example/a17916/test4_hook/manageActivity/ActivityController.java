@@ -2,6 +2,7 @@ package com.example.a17916.test4_hook.manageActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.example.a17916.test4_hook.monitorService.MyActivityHandler;
 import com.example.a17916.test4_hook.monitorService.OpenActivityTask;
@@ -15,6 +16,7 @@ public class ActivityController {
     public static final String OPEN_ACTIVITY = "openActivity";
     public static final String TARGET_INTENT = "targetIntent";
     public static final String PK_NAME = "packageName";
+    public static final String OPEN_ANALYSE_ACTIVITY = "openAnalyseResultActivity";
     public static final String TEXT = "TEXT";
 
     private String currentActivityName;
@@ -71,6 +73,12 @@ public class ActivityController {
         broadIntent.putExtra(ActivityController.PK_NAME,packageName);
         context.sendBroadcast(broadIntent);
     }
+
+    /**
+     * 先把任务添加到队列，然后打开对用的App
+     * @param packageName
+     * @param task
+     */
     public void addTask(String packageName, OpenActivityTask task){
         task.setContext(context);
         task.setMyHandler(myHandler);
