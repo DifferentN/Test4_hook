@@ -81,6 +81,9 @@ public class UnionOpenActivityTask extends OpenActivityTask {
         }else if(curStep.getStepType()==StepContent.INTENT_TYPE&&!curAppName.equals(curStep.getAppName())){
             return;
         }
+        if(curStep.getStepType()==StepContent.INTENT_TYPE&&!requireActivityName.equals(curActivityName)){
+            return;
+        }
         executeStep(curStep,operation);
         steps.remove(0);
 

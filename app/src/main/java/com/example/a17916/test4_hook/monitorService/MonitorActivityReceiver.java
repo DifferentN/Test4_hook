@@ -15,6 +15,7 @@ import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +71,7 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
                 break;
             case MonitorActivityService.ON_RESUME_STATE:
                 Log.i("LZH","收到显示的页面");
+//                tempSaveIntent();
                 if(!isRepeat(intent)){
                     myHandler.onResumeActivity(this,intent);
                 }
@@ -164,4 +166,5 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
             return true;
         }
     }
+
 }

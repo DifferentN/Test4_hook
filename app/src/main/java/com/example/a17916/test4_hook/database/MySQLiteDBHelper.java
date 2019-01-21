@@ -47,6 +47,16 @@ public class MySQLiteDBHelper extends SQLiteOpenHelper {
             MotionData.ActivityName+" TEXT, "+
             MotionData.ResType+" TEXT "+
             ");";
+    private static final String createIntentParameterTable = "CREATE TABLE "+IntentParameter.tableName+" ( "+
+            IntentParameter.IntentParameterId+" integer PRIMARY KEY AUTOINCREMENT, "+
+            IntentParameter.ParameterKey+" TEXT , "+
+            IntentParameter.ValueType+" TEXT , "+
+            IntentParameter.ParameterValue+" TEXT , "+
+            IntentParameter.ActivityId+" integer , "+
+            IntentParameter.ResId+" integer , "+
+            "FOREIGN KEY( "+IntentParameter.ActivityId+" ) REFERENCES "+ActivityData.tableName+" ( "+ActivityData.ActivityId+" ) , "+
+            "FOREIGN KEY( "+IntentParameter.ResId+" ) REFERENCES "+ResourceData.ResourceTable+" ( "+ResourceData.ResId+" )"+
+            ");";
 
     public MySQLiteDBHelper(Context context){
         this(context,DB_NAME,null,DB_VERSION);
@@ -63,6 +73,7 @@ public class MySQLiteDBHelper extends SQLiteOpenHelper {
         db.execSQL(createAvtivityTable);
         db.execSQL(createIntentTable);
         db.execSQL(createMotionTable);
+        db.execSQL(createIntentParameterTable);
     }
 
     @Override

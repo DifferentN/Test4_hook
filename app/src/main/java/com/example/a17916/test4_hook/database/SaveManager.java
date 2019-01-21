@@ -12,7 +12,10 @@ import com.example.a17916.test4_hook.util.normal.ParcelableUtil;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class SaveManager {
     private static SaveManager saveManager;
@@ -206,5 +209,35 @@ public class SaveManager {
             database.insert(IntentData.IntentTable,null,values);
         }
         cursor.close();
+    }
+
+    /**
+     * 把hashMap中的键值对 参数添加到IntentParameter
+     * @param resourceData
+     * @param activityData
+     * @param hashMap
+     */
+    public void addIntentParameter(ResourceData resourceData,ActivityData activityData,HashMap<String,String> hashMap,HashMap<String,String> typeMap){
+        int parameterSize = hashMap.size();
+        int activityId = activityData.getActivityId();
+        int resId = resourceData.getResId();
+
+        Set<String> keys = hashMap.keySet();
+        Iterator<String> iterator = keys.iterator();
+        String key = null,value = null;
+
+        ContentValues contentValues = new ContentValues();
+        while (iterator.hasNext()){
+            key = iterator.next();
+            value = hashMap.get(key);
+
+            contentValues.put(IntentParameter.ActivityId,activityId);
+            contentValues.put(IntentParameter.ResId,resId);
+            contentValues.put(IntentParameter.ParameterKey,key);
+            contentValues.put(IntentParameter.ValueType,typeMap.get(key));
+            contentValues.put(IntentParameter.ParameterKey,value);
+            database.insert(IntentParameter.tableName,null,contentValues);
+            contentValues.clear();
+        }
     }
 }

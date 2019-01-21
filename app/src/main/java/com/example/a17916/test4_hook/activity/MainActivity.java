@@ -15,8 +15,10 @@ import com.example.a17916.test4_hook.ViewManager.FloatViewManager;
 import com.example.a17916.test4_hook.manageActivity.ActivityController;
 import com.example.a17916.test4_hook.manageActivity.ControllerService;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+import com.example.a17916.test4_hook.openTaskModule.StepContent;
 import com.example.a17916.test4_hook.openTaskModule.TaskGenerator;
 import com.example.a17916.test4_hook.openTaskModule.UnionOpenActivityTask;
+import com.example.a17916.test4_hook.openTaskModule.UnionTaskBuilder;
 import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
 
@@ -77,12 +79,26 @@ public class MainActivity extends AppCompatActivity {
 //        task.setMyHandler(MyActivityHandler.getInstance());
 //        controller.addTask("com.douban.movie","com.douban.frodo.subject.activity.LegacySubjectActivity",task);
 
-        TaskGenerator taskGenerator = new TaskGenerator(this.getApplicationContext());
+//        TaskGenerator taskGenerator = new TaskGenerator(this.getApplicationContext());
+//
+//        UnionOpenActivityTask task = taskGenerator.generatorTask("com.yongche.android.YDBiz.Order.HomePage.MainActivity","UseCar","房山",0);
+//        ActivityController controller = ActivityController.getInstance(getApplicationContext());
+//        controller.addTask("com.yongche.android","",task);
 
-        UnionOpenActivityTask task = taskGenerator.generatorTask("com.yongche.android.YDBiz.Order.HomePage.MainActivity","UseCar","房山",0);
+        SavePreference savePreference = SavePreference.getInstance(this.getApplicationContext());
+        Intent intent = savePreference.getIntent("com.douban.frodo.subject.activity.LegacySubjectActivity");
+        String appName = intent.getStringExtra("appName");
+
+        intent.putExtra("",new Bundle());
+
+        UnionTaskBuilder builder = new UnionTaskBuilder(this);
+        builder.addIntentStep(intent,"com.douban.movie.activity.MainActivity",appName);
+        UnionOpenActivityTask task = builder.generateTask();
         ActivityController controller = ActivityController.getInstance(getApplicationContext());
-        controller.addTask("com.yongche.android","",task);
+        controller.addTask("com.douban.movie",null,task);
 
+//        Intent intent = getPackageManager().getLaunchIntentForPackage("com.douban.movie");
+//        startActivity(intent);
     }
     public void openCreateIntent(){
         int time = 0;

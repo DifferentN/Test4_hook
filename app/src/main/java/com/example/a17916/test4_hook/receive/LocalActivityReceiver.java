@@ -31,6 +31,10 @@ import com.example.a17916.test4_hook.view_data.MyViewTree;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * 主要用来播放Intent，输入，点击事件。
+ * 抽取，传递页面信息
+ */
 public class LocalActivityReceiver extends BroadcastReceiver {
     private Activity selfActivity;
     public static final String findView = "findView";
@@ -278,6 +282,7 @@ public class LocalActivityReceiver extends BroadcastReceiver {
 
         return addDataIntent;
     }
+
 
 
 

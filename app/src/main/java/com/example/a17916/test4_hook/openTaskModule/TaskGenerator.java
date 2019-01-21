@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSONObject;
 import com.example.a17916.test4_hook.database.ActivityData;
 import com.example.a17916.test4_hook.database.AppData;
 import com.example.a17916.test4_hook.database.QueryManager;
@@ -68,6 +69,10 @@ public class TaskGenerator {
         UnionOpenActivityTask task = createTask(file,resId,resType,resEntityName,activityName);
 
         return task;
+    }
+
+    public void GenerateTaskByJson(JSONObject jsonObject){
+
     }
 
     /**
