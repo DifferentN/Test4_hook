@@ -50,6 +50,74 @@ public class IntentUtil {
         }
         return null;
     }
+    public static String getType(Bundle bundle,String targetKey){
+        Set<String> keySet = bundle.keySet();
+        Object o = null;
+        String clazzName = null;
+        for(String key:keySet){
+            o = bundle.get(key);
+            clazzName = o.getClass().getName();
+            if(key.compareTo(targetKey)==0){
+                return clazzName;
+            }
+            if(clazzName.compareTo(Bundle.class.getName())==0){
+                return getType((Bundle) o,targetKey);
+            }
+        }
+        return null;
+    }
+    public static void showKeyValue(Bundle bundle){
+        if(bundle==null){
+            return;
+        }
+        Set<String> keySet = bundle.keySet();
+        Object o = null;
+        String clazzName = null;
+        for(String key:keySet){
+            o = bundle.get(key);
+            clazzName = o.getClass().getName();
+            Log.i("LZH","key: "+key);
+            if(clazzName.compareTo(Bundle.class.getName())==0){
+               showKeyValue((Bundle) o);
+            }
+        }
+    }
+    public static Serializable getSerializable(String targetKey,Bundle bundle){
+        Set<String> keySet = bundle.keySet();
+        Object o = null;
+        String clazzName = null;
+        for(String key:keySet){
+            o = bundle.get(key);
+            clazzName = o.getClass().getName();
+            if(key.compareTo(targetKey)==0){
+                if(isSerializable(o)){
+                    return (Serializable) o;
+                }
+            }
+            if(clazzName.compareTo(Bundle.class.getName())==0){
+                return getSerializable(targetKey,(Bundle) o);
+            }
+        }
+        return null;
+    }
+    public static Parcelable getParcelable(String targetKey,Bundle bundle){
+        Set<String> keySet = bundle.keySet();
+        Object o = null;
+        String clazzName = null;
+        for(String key:keySet){
+            o = bundle.get(key);
+            clazzName = o.getClass().getName();
+            if(key.compareTo(targetKey)==0){
+                if(isParcelable(o)){
+                    return (Parcelable) o;
+                }
+            }
+            if(clazzName.compareTo(Bundle.class.getName())==0){
+                return getParcelable(targetKey,(Bundle) o);
+            }
+        }
+        return null;
+    }
     private static boolean isBasicType(String clazzName){
         for(String type:basicType){
             if(type.compareTo(clazzName)==0){

@@ -7,7 +7,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.example.a17916.test4_hook.R;
 import com.example.a17916.test4_hook.TempGenerateDataBase.GenerateDataService;
 import com.example.a17916.test4_hook.TempGenerateDataBase.TestShowDataBase;
@@ -23,6 +26,7 @@ import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.share.SavePreference;
 
 public class MainActivity extends AppCompatActivity {
+    private EditText editText;
 
     private String packageName = "";
     private String activityName = "";
@@ -33,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         StartSendDataService();
         startSaveData();
+        editText = findViewById(R.id.editText);
 
         TestShowDataBase testShowDataBase = TestShowDataBase.getInstance();
         testShowDataBase.showData();
@@ -97,6 +102,8 @@ public class MainActivity extends AppCompatActivity {
         ActivityController controller = ActivityController.getInstance(getApplicationContext());
         controller.addTask("com.douban.movie",null,task);
 
+
+
 //        Intent intent = getPackageManager().getLaunchIntentForPackage("com.douban.movie");
 //        startActivity(intent);
     }
@@ -130,5 +137,38 @@ public class MainActivity extends AppCompatActivity {
         SavePreference savePreference = SavePreference.getInstance(getApplicationContext());
         Intent intent = savePreference.getIntent(ActivityName);
         return  intent;
+    }
+    public void clickOpen(View view){
+        String activityName = "com.douban.frodo.subject.activity.LegacySubjectActivity";
+        String specialKey = "白蛇：缘起";//白蛇：缘起   大黄蜂
+
+        String key = "<"+activityName+">1"+"/"+specialKey+"/"+"Intent";
+        key = editText.getText().toString();
+        Log.i("LZH","使用的："+key);
+        SavePreference savePreference = SavePreference.getInstance(this.getApplicationContext());
+
+        Intent intent = savePreference.getIntent(key);
+        if(intent==null){
+            Log.i("LZH","得不到JSON创建的Intent");
+        }
+        //找出appName
+        String keys[] = key.split("/");
+        String newKey = keys[0]+"/"+keys[1]+"/"+"JSON";
+        String jsonStr = savePreference.readJSONStr(newKey);
+        JSONArray jsonArray = JSONArray.parseArray(jsonStr);
+        JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+
+        String appName = jsonObject.getString("appName");
+        Log.i("LZH","appName: "+appName);
+
+        UnionTaskBuilder builder = new UnionTaskBuilder(this);
+        builder.addIntentStep(intent,"com.douban.movie.activity.MainActivity",appName);
+        UnionOpenActivityTask task = builder.generateTask();
+        ActivityController controller = ActivityController.getInstance(getApplicationContext());
+
+        String pkName = intent.getComponent().getPackageName();
+
+        controller.addTask(pkName,null,task);
+
     }
 }

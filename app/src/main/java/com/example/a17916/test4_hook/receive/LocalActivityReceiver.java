@@ -24,7 +24,9 @@ import com.example.a17916.test4_hook.TestGenerateTemple.TestGenerateTemple;
 import com.example.a17916.test4_hook.activity.showResult.AnalyseResultActivity;
 import com.example.a17916.test4_hook.manageActivity.ActivityController;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
+import com.example.a17916.test4_hook.util.normal.AddJsonParameterUtil;
 import com.example.a17916.test4_hook.util.normal.AppUtil;
+import com.example.a17916.test4_hook.util.normal.DateUtil;
 import com.example.a17916.test4_hook.view_data.MyViewNode;
 import com.example.a17916.test4_hook.view_data.MyViewTree;
 
@@ -150,10 +152,16 @@ public class LocalActivityReceiver extends BroadcastReceiver {
                 break;
             case LocalActivityReceiver.GenerateIntentData:
                 if(selfActivityName.equals(showActivityName)){
-                    ArrayList<PageResult> pageResults = analyseViewTree(context);
+                    ArrayList<PageResult> pageResults = null;
+                    if(selfActivityName.equals("com.douban.frodo.subject.activity.LegacySubjectActivity")){
+                        pageResults = analyseViewTree(context);
+                    }
                     //添加数据
-                    Intent generateDataIntent = testGenerateData(pageResults);
-                    selfActivity.sendBroadcast(generateDataIntent);
+//                    Intent generateDataIntent = testGenerateData(pageResults);
+
+                    analyseJSON(pageResults);
+
+//                    selfActivity.sendBroadcast(generateDataIntent);
                 }else{
 //                    Log.i("LZH","not open window "+selfActivityName+"  show "+showActivityName);
                 }
@@ -281,6 +289,22 @@ public class LocalActivityReceiver extends BroadcastReceiver {
         addDataIntent.putExtra(GenerateDataService.PACKAGE_NAME,selfActivity.getPackageName());
 
         return addDataIntent;
+    }
+
+    private void analyseJSON(ArrayList<PageResult> pageResults){
+        String specialKey = "";
+        if(selfActivityName.compareTo("com.douban.frodo.subject.activity.LegacySubjectActivity")==0){
+            for(PageResult pageResult:pageResults){
+                if(pageResult.getEntityType().equals("电影名称")){
+                    specialKey = pageResult.getNodeValue();
+                }
+            }
+        }else{
+            specialKey = DateUtil.getHMS();
+        }
+        Log.i("LZH","special Key: "+specialKey);
+        AddJsonParameterUtil addJsonParameterUtil = new AddJsonParameterUtil(selfActivity);
+        addJsonParameterUtil.addParameter(selfActivityName,specialKey,selfActivity.getIntent());
     }
 
 

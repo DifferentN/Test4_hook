@@ -44,11 +44,18 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
     private boolean isInputedText = false;
     private String text;
     private byte[] eventBytes;
+    private boolean recycle = false;
 
+    //替换为延时打开
     //记录App打开的页面，当>=2个时，打开目标页面
     private ArrayMap<String,HashMap<String,Boolean>> record;
     //记录页面打开时间
     private HashMap<String,Long> hashMap;
+
+    //延时打开
+    private OnResumeRunnable onResumeRunnable = null;
+    private Thread thread = null;
+
     private MyActivityHandler myHandler;
     public MonitorActivityReceiver(Service service){
         this.service = service;
@@ -72,8 +79,19 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
             case MonitorActivityService.ON_RESUME_STATE:
                 Log.i("LZH","收到显示的页面");
 //                tempSaveIntent();
-                if(!isRepeat(intent)){
-                    myHandler.onResumeActivity(this,intent);
+//                if(!isRepeat(intent)){
+//                    myHandler.onResumeActivity(this,intent);
+//                }
+                if(recycle){
+                    onResumeRunnable = null;
+                    recycle = false;
+                }
+                if(onResumeRunnable == null){
+                    onResumeRunnable = new OnResumeRunnable(this,myHandler,this,intent);
+                    thread = new Thread(onResumeRunnable);
+                    thread.start();
+                }else{
+                    onResumeRunnable.setUpdate(true,this,intent);
                 }
 
                 break;
@@ -164,6 +182,45 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
             return  false;
         }else {
             return true;
+        }
+    }
+
+    private void setRecycle(Boolean b){
+        recycle = b;
+    }
+
+    private static class OnResumeRunnable implements Runnable{
+        private MyActivityHandler handler;
+        private Operation operation;
+        private Intent intent;
+        private Boolean update = true;
+        private MonitorActivityReceiver receiver;
+        public OnResumeRunnable(MonitorActivityReceiver receiver,MyActivityHandler handler,Operation operation,Intent intent){
+            this.handler = handler;
+            this.operation = operation;
+            this.intent = intent;
+            this.receiver = receiver;
+        }
+
+        @Override
+        public void run() {
+            while(update){
+                update = false;
+                try {
+                    Thread.sleep(300);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.i("LZH","Intent sleep");
+            }
+            handler.onResumeActivity(operation,intent);
+            receiver.setRecycle(true);
+            Log.i("LZH","发出Intent");
+        }
+        public void setUpdate(Boolean b,Operation operation,Intent intent){
+            update = b;
+            this.operation = operation;
+            this.intent = intent;
         }
     }
 

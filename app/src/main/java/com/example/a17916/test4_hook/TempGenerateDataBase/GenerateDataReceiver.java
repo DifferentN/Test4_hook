@@ -232,9 +232,7 @@ public class GenerateDataReceiver extends BroadcastReceiver {
         testShowDataBase.showData();
     }
 
-    private void saveIntentByJson_DouBanFlim(){
 
-    }
 
 //    /**
 //     * 给App添加一个资源，用来获得资源类型

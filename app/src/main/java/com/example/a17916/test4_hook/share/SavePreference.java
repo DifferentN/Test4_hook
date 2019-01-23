@@ -28,6 +28,14 @@ public class SavePreference {
         Intent intent = transformToIntent(bytes);
         return intent;
     }
+    public void writeJSONStr(String key,String jsonStr){
+        editor.putString(key,jsonStr).commit();
+    }
+    public String readJSONStr(String key){
+        String raw= preferences.getString(key,"");
+        return raw;
+    }
+
     public void writeIntent(String key,Intent intent){
 //        Log.i("LZH","save key "+key);
         byte[] bytes = transformToBytes(intent);
@@ -68,6 +76,7 @@ public class SavePreference {
         parcel.recycle();
         return bytes;
     }
+
 
 
 }

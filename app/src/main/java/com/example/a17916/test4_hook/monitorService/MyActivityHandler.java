@@ -48,9 +48,10 @@ public class MyActivityHandler {
     //移除之前添加的相同的任务，防止发生错误
     public void addTask(OpenActivityTask task){
         String taskType = task.getTaskType();
+
         int len = tasks.size();
         for(int i=0;i<len;i++){
-            if(tasks.get(i).getTaskType().equals(taskType)){
+            if(tasks.get(i).getTaskType()==null||tasks.get(i).getTaskType().equals(taskType)){
                 tasks.remove(i);
                 i--;
                 len--;

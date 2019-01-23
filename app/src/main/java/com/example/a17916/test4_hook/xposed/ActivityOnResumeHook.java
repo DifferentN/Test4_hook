@@ -15,6 +15,8 @@ import com.example.a17916.test4_hook.receive.LocalActivityReceiver;
 import com.example.a17916.test4_hook.monitorService.MonitorActivityService;
 import com.example.a17916.test4_hook.share.SavePreference;
 import com.example.a17916.test4_hook.util.normal.AppUtil;
+import com.example.a17916.test4_hook.util.normal.IntentUtil;
+import com.example.a17916.test4_hook.util.normal.ViewUtil;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -48,6 +50,9 @@ public class ActivityOnResumeHook extends XC_MethodHook {
         ComponentName componentName = activity.getComponentName();
         String activityName = componentName.getClassName();
         Log.i("LZH","after resume "+componentName.getClassName()+" pkName "+componentName.getPackageName());
+
+        IntentUtil.showKeyValue(activity.getIntent().getExtras());
+//        Log.i("LZH","activity: "+componentName.getClassName()+" 有的View数 "+ViewUtil.getViewCountInActivity(activity.getWindow().getDecorView()));
 
         Intent intent = new Intent();
         intent.setAction(LocalActivityReceiver.currentActivity);

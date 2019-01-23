@@ -62,6 +62,7 @@ public class MonitorActivityService extends Service{
 
     private MonitorActivityReceiver openActivityReceiver;
     private SaveMotionReceiver saveMotionRecevier;
+    private SaveJSONAndIntentByIt saveJSONAndIntentByIt;
     public MonitorActivityService(){
         super();
     }
@@ -71,6 +72,7 @@ public class MonitorActivityService extends Service{
         super.onCreate();
         historyInent = new ArrayList<>();
         savePreference = SavePreference.getInstance(getApplicationContext());
+
         init();
 
 
@@ -101,6 +103,12 @@ public class MonitorActivityService extends Service{
         intentFilter1.addAction(MonitorActivityService.ON_RESUME_STATE);
         intentFilter1.addAction(MonitorActivityService.OVERTURN_SAVE);
         registerReceiver(saveMotionRecevier,intentFilter1);
+
+        saveJSONAndIntentByIt = new SaveJSONAndIntentByIt(this);
+        IntentFilter intentFilter2 = new IntentFilter();
+        intentFilter2.addAction(SaveJSONAndIntentByIt.SAVE_INTENT_CREATEBY_JSON);
+        intentFilter2.addAction(SaveJSONAndIntentByIt.SAVE_JSON);
+        registerReceiver(saveJSONAndIntentByIt,intentFilter2);
     }
 
 

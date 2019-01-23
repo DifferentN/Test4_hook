@@ -325,4 +325,21 @@ public class ViewUtil {
         Log.v("liuyi", "id name: " + result);
         return result;
     }
+    public static int getViewCountInActivity(View view){
+        int count = 0;
+        ViewGroup viewGroup;
+        View childView;
+        if(view instanceof ViewGroup){
+            viewGroup = (ViewGroup) view;
+
+            int childCount = viewGroup.getChildCount();
+            for(int i=0;i<childCount;i++){
+                childView = viewGroup.getChildAt(i);
+                count+=getViewCountInActivity(childView);
+            }
+        }else{
+            return 1;
+        }
+        return count;
+    }
 }
