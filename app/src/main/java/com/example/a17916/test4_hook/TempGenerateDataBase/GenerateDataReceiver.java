@@ -303,6 +303,7 @@ public class GenerateDataReceiver extends BroadcastReceiver {
     private void tempSaveIntent(Intent intent,String activityName){
         SavePreference savePreference = SavePreference.getInstance(context);
         savePreference.writeIntent(activityName,intent);
+        Log.i("LZH","测试保存Intent的key: "+activityName);
     }
 
 }

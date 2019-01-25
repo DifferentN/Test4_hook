@@ -91,10 +91,10 @@ public class MainActivity extends AppCompatActivity {
 //        controller.addTask("com.yongche.android","",task);
 
         SavePreference savePreference = SavePreference.getInstance(this.getApplicationContext());
-        Intent intent = savePreference.getIntent("com.douban.frodo.subject.activity.LegacySubjectActivity");
-        String appName = intent.getStringExtra("appName");
+        Intent intent = savePreference.getIntent("com.douban.frodo.baseproject.image.SociableImageActivity");
+        String appName = "豆瓣电影";
 
-        intent.putExtra("",new Bundle());
+//        intent.putExtra("",new Bundle());
 
         UnionTaskBuilder builder = new UnionTaskBuilder(this);
         builder.addIntentStep(intent,"com.douban.movie.activity.MainActivity",appName);

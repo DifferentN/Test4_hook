@@ -215,7 +215,7 @@ public class MonitorActivityReceiver extends BroadcastReceiver implements Operat
             }
             handler.onResumeActivity(operation,intent);
             receiver.setRecycle(true);
-            Log.i("LZH","发出Intent");
+//            Log.i("LZH","发出Intent,打开："+intent.getComponent().getClassName());
         }
         public void setUpdate(Boolean b,Operation operation,Intent intent){
             update = b;

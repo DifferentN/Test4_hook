@@ -299,6 +299,23 @@ public class LocalActivityReceiver extends BroadcastReceiver {
                     specialKey = pageResult.getNodeValue();
                 }
             }
+
+            //The following code work!!!
+//            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+//            Class clazz = null;
+//            try {
+//                clazz = classLoader.loadClass("com.douban.frodo.subject.activity.LegacySubjectActivity");
+//            } catch (ClassNotFoundException e) {
+//                e.printStackTrace();
+//                Log.e("LZH","不能创建class: com.douban.frodo.subject.activity.LegacySubjectActivity");
+//            }
+//            if(clazz==null){
+//                Log.i("LZH","class is null");
+//            }else{
+//                Log.i("LZH","class is not null");
+//            }
+
+
         }else{
             specialKey = DateUtil.getHMS();
         }
@@ -306,8 +323,5 @@ public class LocalActivityReceiver extends BroadcastReceiver {
         AddJsonParameterUtil addJsonParameterUtil = new AddJsonParameterUtil(selfActivity);
         addJsonParameterUtil.addParameter(selfActivityName,specialKey,selfActivity.getIntent());
     }
-
-
-
 
 }

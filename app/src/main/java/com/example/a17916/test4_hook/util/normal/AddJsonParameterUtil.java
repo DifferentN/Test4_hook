@@ -46,9 +46,11 @@ public class AddJsonParameterUtil {
     }
 
     public void addParameter(String activityName,String specialKey,Intent intent){
+//        Log.i("LZH","读取XML");
         String path = Environment.getExternalStorageDirectory().getAbsolutePath()+"/douban.xml";
         List<JSONNode> lists = getJSONFromXML(activityName,path);
-
+//        Log.i("LZH","读取XML结束");
+//        Log.i("LZH","JSONNode lists size: "+lists.size());
 //        String tempJsonArrayStr = "[{\"basic_name\":\"page_uri\",\"basic_type\":\"java.lang.String\",\"basic_value\":\"parameter1\"},{\"basic_name\":\"subject_uri\",\"basic_type\":\"java.lang.String\",\"basic_value\":\"parameter2\"},[{\"object_name\":\"com.douban.frodo.SUBJECT\",\"object_type\":\"com.douban.frodo.subject.model.subject.Subject\"},{\"attribute_name\":\"title\",\"attribute_type\":\"java.lang.String\",\"attribute_value\":\"parameter3\"}]]";
 //        JSONArray tempJsonArray = JSONArray.parseArray(tempJsonArrayStr);
 //        JSONNode tempNode = new JSONNode("<com.douban.frodo.subject.activity.LegacySubjectActivity>1",tempJsonArray);
@@ -77,11 +79,11 @@ public class AddJsonParameterUtil {
             sendAndSaveJson(node.apiName,specialKey,jsonArray);
             if(first==0){
                 reCreateIntent = recreateIntent(jsonArray);
+                IntentUtil.showKeyValue(reCreateIntent.getExtras());
                 first++;
             }
             sendAndSaveIntent(node.apiName,specialKey,reCreateIntent);
         }
-
 
     }
     //在JSON中添加一些必要信息，如IntentUri 应用的名称
@@ -166,10 +168,130 @@ public class AddJsonParameterUtil {
                 intent.putExtra(key,Long.valueOf(value));
             }else if(type.equals("java.lang.Boolean")){
                 intent.putExtra(key,Boolean.valueOf(value));
+            }else if(type.endsWith("List")){
+                restoreListAndFillIntent(jsonObject,intent);
+            }else if(type.startsWith("[")){
+                Log.i("LZH","未将数组还原");
             }
+        }
+    }
+
+    /**
+     * 获取由List转化的String类型的值，将其还原，并填充到Intent中
+     * @param jsonObject
+     * @param intent
+     */
+    private void restoreListAndFillIntent(JSONObject jsonObject,Intent intent){
+        String key = jsonObject.getString("basic_name");
+        String value = jsonObject.getString("basic_value");
+        String itemType = jsonObject.getString("item_type");//为item的确切类型，目前主要用来恢复Parcelable
+        String itemFatherType = jsonObject.getString("item_father_type");//为item的类型
+        JSONObject jsonList = JSONObject.parseObject(value);
+        int size = Integer.valueOf(jsonList.getString("size"));
+        Log.i("LZH","list类型的链表的大小: "+size);
+        String itemValue = null;
+        ArrayList<Object> list = new ArrayList<>();
+        //创建位置item类型的List
+        for(int i=0;i<size;i++){
+            itemValue = jsonList.getString("item_"+i);
+            if(itemFatherType.equals(Integer.class.getName())){
+                list.add(transformToInteger(itemValue));
+            }else if(itemFatherType.equals(Long.class.getName())){
+                list.add(transformToLong(itemValue));
+            }else if(itemFatherType.equals(Float.class.getName())){
+                list.add(transformToFloat(itemValue));
+            }else if(itemFatherType.equals(Double.class.getName())){
+                list.add(transformToDouble(itemValue));
+            }else if(itemFatherType.equals(Byte.class.getName())){
+                list.add(transformToByte(itemValue));
+            }else if(itemFatherType.equals(Character.class.getName())){
+                list.add(transformToCharacter(itemValue));
+            }else if(itemFatherType.equals(Boolean.class.getName())){
+                list.add(transformToBoolean(itemValue));
+            }else if(itemFatherType.equals(String.class.getName())){
+                list.add(itemValue);
+            }else if(itemFatherType.equals(Serializable.class.getName())){
+                list.add(transformToSerializable(itemValue));
+            }else if(itemFatherType.equals(Parcelable.class.getName())){
+
+                Class clazz = null;
+                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+                try {
+                    clazz = classLoader.loadClass(itemType);
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                if(clazz == null){
+                    Log.i("LZH","未能根据类名创建一个Class "+itemType);
+                }
+//                Object itemObject = IntentUtil.getListItem(key,bundle);
+//                Log.i("LZH","item的类型："+itemObject.getClass().getName());
+                list.add(transformToParcelable(itemValue,clazz));
+            }
+        }
+        //确定list中item的确切类型
+        if(itemFatherType.equals(Parcelable.class.getName())){
+            ArrayList<Parcelable> parcelables = new ArrayList<>();
+
+            for(int i=0;i<list.size();i++){
+                parcelables.add((Parcelable) list.get(i));
+            }
+            intent.putParcelableArrayListExtra(key,parcelables);
+            Log.i("LZH","outPut list: "+parcelables.toString());
+            Log.i("LZH","Intent中加入ParcelableList "+key);
+        }else if(itemFatherType.equals(String.class.getName())){
+            ArrayList<String> strings = new ArrayList<>();
+            for(int i=0;i<list.size();i++){
+                strings.add((String) list.get(i));
+            }
+            intent.putStringArrayListExtra(key,strings);
+            Log.i("LZH","outPut list: "+strings.toString());
+        }else if(itemFatherType.equals(Integer.class.getName())){
+            ArrayList<Integer> ints = new ArrayList<>();
+            for(int i=0;i<list.size();i++){
+                ints.add((Integer) list.get(i));
+            }
+            intent.putIntegerArrayListExtra(key,ints);
+            Log.i("LZH","outPut list: "+ints.toString());
         }
 
     }
+    private static Integer transformToInteger(String value){
+        return Integer.valueOf(value);
+    }
+    private static Long transformToLong(String value){
+        return Long.valueOf(value);
+    }
+    private static Double transformToDouble(String value){
+        return Double.valueOf(value);
+    }
+    private static Float transformToFloat(String value){
+        return Float.valueOf(value);
+    }
+    private static Character transformToCharacter(String value){
+        if(value.length()<=0){
+            Log.i("LZH","从JSON中解析char,填充Intent失败");
+            return ' ';
+        }
+        return Character.valueOf(value.charAt(0));
+    }
+    private static Byte transformToByte(String value){
+        return Byte.valueOf(value);
+    }
+    private static Boolean transformToBoolean(String value){
+        return Boolean.valueOf(value);
+    }
+    private static Serializable transformToSerializable(String value){
+        Serializable serializable = (Serializable) JSONObject.parseArray(value,Serializable.class);
+        return serializable;
+    }
+    private static Parcelable transformToParcelable(String value,Class clazz){
+        byte[] bytes = IntentUtil.StringToByte(value);
+        Parcelable parcelable = IntentUtil.byteToParcelable(bytes,clazz);
+        return parcelable;
+    }
+
+
     //测试
     private void addObjectToIntent(JSONArray jsonArray,Intent intent){
         JSONObject jsonObject = (JSONObject) jsonArray.get(0);
@@ -216,7 +338,6 @@ public class AddJsonParameterUtil {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
-
     }
     //测试
     private Object fillAttributeToObject(Field field,Object o,String value,String type){
@@ -290,7 +411,13 @@ public class AddJsonParameterUtil {
 
     private JSONObject addBasicParameter(JSONObject targetJsonObject, Intent intent){
         String key = targetJsonObject.getString("basic_name");
+        String type = targetJsonObject.getString("basic_type");
+        if(type.endsWith("List")){
+            IntentUtil.addListAttributeToJSONObject(targetJsonObject,intent.getExtras(),key);
+        }
         String value = IntentUtil.getValue(intent.getExtras(),key);
+//        Log.i("LZH",key+" : "+value);
+        //如果value的值为null，json中将不会有basic_value;
         targetJsonObject.put("basic_value",value);
         return targetJsonObject;
     }
@@ -384,6 +511,7 @@ public class AddJsonParameterUtil {
         }
         return jsonNode;
     }
+
 
     static class JSONNode{
         public String apiName;

@@ -84,6 +84,7 @@ public class UnionOpenActivityTask extends OpenActivityTask {
 //        if(curStep.getStepType()==StepContent.INTENT_TYPE&&!requireActivityName.equals(curActivityName)){
 //            return;
 //        }
+        Log.i("LZH","要打开的Activity: "+curStep.getSendIntent().getComponent().getClassName());
         executeStep(curStep,operation);
         steps.remove(0);
 
